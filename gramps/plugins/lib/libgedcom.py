@@ -276,6 +276,9 @@ TOKEN__JUST = 135
 TOKEN__TEXT = 136
 TOKEN__DATE = 137
 TOKEN__APID = 138
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+TOKEN_RUFNAME = 200
+#---------------------------------------------------------------------------------------------------
 
 TOKENS = {
     "_ADPN"           : TOKEN__ADPN,
@@ -491,6 +494,7 @@ TOKENS = {
     "VERSION"         : TOKEN_VERS,
     "WIFE"            : TOKEN_WIFE,
     "WWW"             : TOKEN_WWW,
+    "_RUFNAME"        : TOKEN_RUFNAME, # ADDED FOR Q-LATEX OUTPUT
 }
 
 ADOPT_NONE = 0
@@ -2116,7 +2120,8 @@ class GedcomParser(UpdateCallback):
             # lower level from the current parse table) handles date as
             # subsidiary to "2 _MARN", "2 _AKAN" and "2 _ADPN" which has been
             # found in Brother's keeper.
-            TOKEN__ADPN   : self.__name_adpn, }
+            TOKEN__ADPN   : self.__name_adpn, 
+            TOKEN_RUFNAME : self.__name_rufname,} # ADDED FOR Q-LATEX OUTPUT
         self.func_list.append(self.name_parse_tbl)
 
         #
@@ -3202,8 +3207,10 @@ class GedcomParser(UpdateCallback):
         new_note.set_type(note_type)
         self.dbase.add_note(new_note, self.trans)
         # If possible, attach the note to the relevant object
-        if obj:
-            obj.add_note(new_note.get_handle())
+        # DELETED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        #if obj:
+        #    obj.add_note(new_note.get_handle())
+        #---------------------------------------------------------------------------------------------------
 
     def _backup(self):
         """
@@ -4423,6 +4430,18 @@ class GedcomParser(UpdateCallback):
         """
         state.name.set_nick_name(line.data.strip())
         self.__skip_subordinate_levels(state.level + 1, state)
+
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+    def __name_rufname(self, line, state):
+        """
+        @param line: The current line in GedLine format
+        @type line: GedLine
+        @param state: The current state
+        @type state: CurrentState
+        """
+        state.name.set_call_name(line.data.strip())
+        self.__skip_subordinate_levels(state.level + 1, state)
+    #---------------------------------------------------------------------------------------------------
 
     def __name_aka(self, line, state):
         """

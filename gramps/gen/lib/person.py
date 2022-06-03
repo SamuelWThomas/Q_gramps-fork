@@ -667,6 +667,25 @@ class Person(CitationBase, NoteBase, AttributeBase, MediaBase,
     gender = property(get_gender, set_gender, None,
                       'Returns or sets the gender of the person')
 
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+    def get_latex_id(self):	
+        person_id = ""	
+        person_id = self.get_nachname() + self.primary_name.first_name + self.primary_name.suffix + str(self.get_gramps_id())	
+        person_id = person_id.replace(" ", "")	
+        umlaute = {'ö':'oe','ä':'ae','ü':'ue','Ä':'AE','Ö':'OE','Ü':'UE','ß':'ss'} 	
+        for char in umlaute:	
+            person_id = person_id.replace(char,umlaute[char])	
+        return person_id	
+
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------	
+    def get_nachname(self):	
+        nachname = ""	
+        nachnamen = self.primary_name.surname_list	
+        if len(nachnamen) > 0:	
+            nachname = nachnamen[0].surname	
+        return nachname	
+
+
     def set_birth_ref(self, event_ref):
         """
         Assign the birth event to the Person object.

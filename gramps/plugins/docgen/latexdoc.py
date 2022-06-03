@@ -1319,3 +1319,112 @@ class LaTeXDoc(BaseDoc, TextDoc):
                     self.emit("~\\newline \n")
                 self.end_paragraph()
 
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------	
+    @staticmethod	
+    def transform_abbreviations(text):	
+        """	
+        Transform abbreviations to LaTeX complying with the ECONOMIST style guide.	
+            Parameters:	
+                text: str, the text to transform	
+            Returns:	
+                str, the transformed text	
+        """	
+        prog = re.compile(r"(\b([A-ZÄÖÜ]{2,})\b)|(([A-ZÄÖÜ]{1,})([a-zäöü]{1,})([A-ZÄÖÜ]{1,})([a-zäöü]{0,}))")	
+
+        def _replace_abbreviation(match_obj):	
+            abbreviation = match_obj.group(0)	
+            transformed = ""	
+            for char in abbreviation:	
+                if char.islower():	
+                    transformed += char	
+                else:	
+                    transformed += r"\textsc{" + char.lower() + "}"	
+            return transformed	
+
+        neuertext = re.sub(prog, _replace_abbreviation, text)	
+        return neuertext	
+
+    def write_styled_note_aq(self, styledtext, format, style_name,	
+                          contains_html=False, links=False):	
+        """	
+        Convenience function to write a styledtext to the latex doc.	
+        styledtext : assumed a StyledText object to write	
+        format : = 0 : Flowed, = 1 : Preformatted	
+        style_name : name of the style to use for default presentation	
+        contains_html: bool, the backend should not check if html is present.	
+            If contains_html=True, then the textdoc is free to handle that in	
+            some way. Eg, a textdoc could remove all tags, or could make sure	
+            a link is clickable. self ignores notes that contain html	
+        links: bool, make URLs clickable if True	
+        """	
+
+        return_string = ""	
+
+        if contains_html:	
+            return	
+        text = str(styledtext)	
+
+        s_tags = styledtext.get_tags()	
+        if format:	
+            #preformatted, use different escape function	
+            self._backend.setescape(True)	
+
+        markuptext = self._backend.add_markup_from_styled(text, s_tags)	
+
+        if links is True:	
+            markuptext = re.sub(URL_PATTERN, _CLICKABLE, markuptext)	
+        #https://regex101.com/	
+        markuptext = self._backend.add_markup_from_styled(text, s_tags)	
+        markuptext = re.sub(r" \.", ".", markuptext) #remove space before dot	
+        markuptext = re.sub("„", "\"", markuptext) #lower typog. quote	
+        markuptext = re.sub("“", "\"", markuptext) #upper typog. quote	
+        markuptext = re.sub("”", "\"", markuptext) #upper typog. quote	
+        markuptext = re.sub("–", "--", markuptext) #replace a long hyphen by two normal hyphens	
+        markuptext = re.sub("—", "--", markuptext)  #long hyphens—	
+        markuptext = re.sub(r"([zdosuv])\.[ ]?([BhÄJäouZaAUT])\.", r"\1.\\,\2.", markuptext)  #correctly displaying the two-letter abbreviations	
+        markuptext = LaTeXDoc.transform_abbreviations(markuptext) #transform abbreviations according to The Economist style guide	
+        #TODO #[...] / ... --> \textelp{}	
+        markuptext = re.sub(r'([ (_@])\'(.+?)\'([ \".?!_@)])', r'\1|\2|\3', markuptext) #single quotes	
+        markuptext = re.sub(r'([ (_@])‚(.+?)‘([ \".?!_@)])', r'\1|\2|\3', markuptext) #single typograph quotes quotes	
+        markuptext = re.sub(r'([0-9]{2})([0-9]{2}) ??-+? ??([0-9]{2})([^0-9]+)', r'\1\2--\1\3\4', markuptext) #1941-42 --> 1941--1942	
+        markuptext = re.sub(r"(?P<digit>\d),5", r"\g<digit>1/2", markuptext) #,5 -> 1/2	
+        markuptext = re.sub(r"(?P<digit>\d),25", r"\g<digit>1/4", markuptext) #,25 -> 1/4	
+        markuptext = re.sub(r"[1]/([234])([^0-9])", r"\\nicefrac{1}{\1}\2", markuptext) #make fraction	
+        markuptext = re.sub(r" {2,}", " ", markuptext) #double space	
+        markuptext = re.sub(r" {1,}([.,?!])", r"\1", markuptext) #spaces before punctuation marks	
+        markuptext = re.sub(r"\(= (.*?)\)", r"(=~\1)", markuptext) #protected space after "="	
+        markuptext = re.sub(" - ", " -- ", markuptext) #long hyphens	
+        markuptext = re.sub(r"(\d) [-–] (\d)", r"\1--\2", markuptext) #2000 - 2001 --> 2000--2001	
+        markuptext = re.sub(r"(\d)[-–](\d)", r"\1--\2", markuptext) #2000-2001 --> 2000--2001	
+        markuptext = re.sub(r"(\d) -- (\d)", r"\1--\2", markuptext)  #2000 -- 2001 --> 2000--2001	
+        #format dates:	
+        markuptext = re.sub(r"([0-9]+)\.([0-9]+)\.([\d]{4})", r"\\DTMdisplaydate{\3}{\2}{\1}{-1}", markuptext)  #formats dates for Latex' DateTime2	
+        #compile markups:	
+        markuptext = re.sub(r'\\_(.*?)\\_', r'\\footnote{\1}', markuptext) # _.._ will be treated as footnote	
+        markuptext = re.sub(r'\\#(.*?)\\#', r'\\unterabsatz{\1}', markuptext) # #..# will be treated as subsubheading	
+        markuptext = re.sub(r'@(.*?)@', r'\\textit{\1}', markuptext)  # @..@ will be formatted as italic	
+
+        markuptext = re.sub(r'[\r\n]+', '\\r\\n', markuptext, 0, re.MULTILINE) #delete emtpy lines	
+
+        #there is a problem if we write out a note in a table.	
+        # ..................	
+        # now solved by postprocessing in self.calc_latex_widths()	
+        # by explicitely setting suitable width for all columns.	
+        #	
+        if format:	
+            #self.start_paragraph(style_name)	
+            return_string += (markuptext)	
+            #return_string += "\\n"	
+            #self.end_paragraph()	
+            #preformatted finished, go back to normal escape function	
+            self._backend.setescape(False)	
+        else:	
+            for line in markuptext.split('%\n%\n '):	
+                #self.start_paragraph(style_name)	
+                i = 0	
+                for realline in line.split('\n'):	
+                    if i > 0:	
+                        return_string += ("" + "\n\n") #außer vor der ersten Zeile	
+                    return_string += (realline)	
+                    i = i + 1	
+        return return_string

@@ -35,6 +35,9 @@ import os
 from io import StringIO
 from collections import defaultdict
 import time
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+import re, codecs            
+#---------------------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------
 #
@@ -1800,6 +1803,37 @@ class CheckIntegrity:
             self.db.add_note(self.explanation, self.trans, set_gid=True)
 
         known_handles = self.db.get_note_handles()
+
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        #Check if Quotations match:
+        all_notes = ""
+        for note_handle in known_handles:
+            note_obj = self.db.get_note_from_handle(note_handle)
+            note_text = note_obj.get()
+            if not note_text.startswith("Records not imported"):
+                #Collect all notes' texts:
+                all_notes += note_text + "\n\n"
+                #Replace typogr. quotes to normal quotes (for double quotes)
+                note_text = re.sub("„", "\"", note_text) #lower typog. quote
+                note_text = re.sub("“", "\"", note_text) #upper typog. quote
+                note_text = re.sub("”", "\"", note_text)  #upper typog. quote
+                #Replace typogr. quotes to "|" (for single quotes)
+                note_text = re.sub(r'([ (_@])\'(.+?)\'([ \".?!_@)])', r'\1|\2|\3', note_text) #single quotes
+                note_text = re.sub(r'([ (_@])‚(.+?)‘([ \".?!_@)])', r'\1|\2|\3', note_text) #single typograph quotes quotes
+                #Check if double quotes match:
+                count = len(re.findall("\"", note_text)) 
+                if count%2 > 0:
+                    print("Quotation not ok")
+                    for res in re.finditer(r"\"(.*?)\"", note_text, re.MULTILINE):
+                        print('%02d-%02d: %s' % (res.start(), res.end(), res.group(0)))
+        #Write all notes to a file:
+        #output_path = "C:\\Users\\andreas.quentin\\Documents\\Personal Private OneDrive\\OneDrive\\Documents\\Ahnenblatt\\07 LaTeX\\"
+        #output_file_id = "notes"
+        #f = codecs.open(output_path + output_file_id + ".txt","w+",encoding="utf-8")
+        #for i in range(len(all_notes)):
+        #    f.write(all_notes[i])
+        #f.close()    
+        #---------------------------------------------------------------------------------------------------
 
         total = (self.db.get_number_of_people() +
                  self.db.get_number_of_families() +

@@ -31,6 +31,9 @@ from subprocess import Popen, PIPE
 from io import StringIO
 import tempfile
 import logging
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+import math            
+#---------------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------
 #
@@ -424,6 +427,14 @@ class TreeDocBase(BaseDoc, TreeDoc):
     def end_subgraph(self, level):
         self.write(level, '}\n')
 
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+    def getSoSa(self, key):
+        generation = int(math.floor(math.log(key, 2)))  # 0
+        gen_start = pow(2, generation)                  # 1
+        new_gen_start = 1 * gen_start                   # 3
+        return new_gen_start + (key - gen_start)        # 3+0        
+    #---------------------------------------------------------------------------------------------------
+
     def write_node(self, db, level, node_type, person, marriage_flag,
                    option_list=None):
         options = ['id=%s' % person.gramps_id]
@@ -437,18 +448,31 @@ class TreeDocBase(BaseDoc, TreeDoc):
         elif person.gender == Person.UNKNOWN:
             self.write(level+1, 'neuter,\n')
         name = person.get_primary_name()
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        #sosa = str(self.getSoSa(KEY!!!))    
+        #---------------------------------------------------------------------------------------------------
         nick = name.get_nick_name()
         surn = name.get_surname()
-        if self.name_format == "1":
-            name_parts = [self.format_given_names(name),
-                          '\\nick{{{}}}'.format(escape(nick)) if nick else '',
-                          '\\surn{{{}}}'.format(escape(surn)) if surn else '']
-        elif self.name_format == "2":
-            name_parts = ['\\surn{{{}}}'.format(escape(surn)) if surn else '',
-                          self.format_given_names(name),
-                          '\\nick{{{}}}'.format(escape(nick)) if nick else '']
-        self.write(level+1, 'name = {{{}}},\n'.format(
-            ' '.join([e for e in name_parts if e])))
+        # CHANGED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        #if self.name_format == "1":
+        #    name_parts = [self.format_given_names(name),
+        #                  '\\nick{{{}}}'.format(escape(nick)) if nick else '',
+        #                  '\\surn{{{}}}'.format(escape(surn)) if surn else '']
+        #elif self.name_format == "2":
+        #    name_parts = ['\\surn{{{}}}'.format(escape(surn)) if surn else '',
+        #                  self.format_given_names(name),
+        #                  '\\nick{{{}}}'.format(escape(nick)) if nick else '']
+        #self.write(level+1, 'name = {{{}}},\n'.format(
+        #    ' '.join([e for e in name_parts if e])))
+        name_parts = [self.format_given_names(name),
+                      '\\nick{{{}}}'.format(escape(nick)) if nick else '',
+                      '\\surn{{{}}}'.format(escape(surn)) if surn else '']
+        name_komplett = '{{{}}}'.format(
+            ' '.join([e for e in name_parts if e]))
+        hyperref = person.get_latex_id()
+        hyperref = "{\\hyperref[%s]{%s}},\n" % (hyperref, name_komplett)
+        self.write(level+1, 'name = %s' %hyperref)
+        #---------------------------------------------------------------------------------------------------
         for eventref in person.get_event_ref_list():
             if eventref.role == EventRoleType.PRIMARY:
                 event = db.get_event_from_handle(eventref.ref)
@@ -509,6 +533,12 @@ class TreeDocBase(BaseDoc, TreeDoc):
         elif event.type == EventType.CREMATION:
             event_type = 'burial'
             modifier = 'cremated'
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        elif event.type == EventType.OCCUPATION:
+            #Sosa Stradonitz fehlt auch noch: kekule = 100 //ohne Klammern!
+            #LatexID --> UUID
+            event_type = 'profession'    
+        #---------------------------------------------------------------------------------------------------
         else:
             return
 
@@ -536,7 +566,15 @@ class TreeDocBase(BaseDoc, TreeDoc):
         place = escape(_pd.display_event(db, event))
         place = place.replace("-", "\--")
 
-        if modifier:
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        place = ""
+        if event_type == 'profession':
+            beruf = escape(event.get_description())
+            self.write(level, '%s = {%s},\n' %
+                       (event_type, beruf))
+        #if modifier:
+        elif modifier:    
+        #---------------------------------------------------------------------------------------------------
             event_type += '+'
             self.write(level, '%s = {%s}{%s}{%s},\n' %
                        (event_type, date_str, place, modifier))

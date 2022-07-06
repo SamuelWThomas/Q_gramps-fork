@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gramps\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-12 23:08+0000\n"
-"PO-Revision-Date: 2022-01-31 23:52+0000\n"
+"POT-Creation-Date: 2022-03-14 21:35+0000\n"
+"PO-Revision-Date: 2022-04-05 07:11+0000\n"
 "Last-Translator: Tymofii Lytvynenko <till.svit@gmail.com>\n"
 "Language-Team: Ukrainian <https://hosted.weblate.org/projects/gramps-project/"
 "gramps/uk/>\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.11-dev\n"
+"X-Generator: Weblate 4.12-dev\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -33,10 +33,8 @@ msgid "Canada"
 msgstr "Канада"
 
 #: ../data/holidays.xml:84
-#, fuzzy
-#| msgid "Catalan"
 msgid "Catalonia"
-msgstr "Каталанська"
+msgstr "Каталонія"
 
 #: ../data/holidays.xml:101
 msgid "Chile"
@@ -191,10 +189,8 @@ msgid "8 of Hanuka"
 msgstr "8 день Хануки"
 
 #: ../data/holidays.xml:388
-#, fuzzy
-#| msgid "Italic"
 msgid "Italy"
-msgstr "Курсив"
+msgstr "Італія"
 
 #: ../data/holidays.xml:402
 msgid "New Zealand"
@@ -221,10 +217,8 @@ msgid "Sweden"
 msgstr "Швеція"
 
 #: ../data/holidays.xml:508
-#, fuzzy
-#| msgid "Turkish"
 msgid "Turkey"
-msgstr "Турецька"
+msgstr "Туреччина"
 
 #: ../data/holidays.xml:536
 msgid "Ukraine"
@@ -509,13 +503,6 @@ msgstr ""
 "базі даних, додайте SoundEx Gramplet."
 
 #: ../data/tips.xml:32
-#, fuzzy
-#| msgid ""
-#| "<b>Setting Your Preferences</b><br/>\"Edit &gt; Preferences...\" lets you "
-#| "modify a number of settings, such as the path to your media files, and "
-#| "allows you to adjust many aspects of the Gramps presentation to your "
-#| "needs. Each separate view can also be configured under \"View &gt; "
-#| "Configure View...\""
 msgid ""
 "<b>Setting Your Preferences</b><br/>\"Edit &gt; Preferences...\" lets you "
 "modify a number of settings, such as the path to your media files, and "
@@ -7060,25 +7047,17 @@ msgstr "Нагода"
 msgid "None"
 msgstr "Нема"
 
-#: ../gramps/gen/lib/childreftype.py:68 ../gramps/gen/lib/eventtype.py:165
-#: ../gramps/gen/utils/symbols.py:93 ../gramps/gui/configure.py:2230
-#: ../gramps/gui/merge/mergeperson.py:189
-#: ../gramps/plugins/export/exportvcalendar.py:151
-#: ../gramps/plugins/gramplet/ancestor.py:65
-#: ../gramps/plugins/gramplet/descendant.py:63
-#: ../gramps/plugins/importer/importprogen.glade:1472
-#: ../gramps/plugins/quickview/all_relations.py:270
-#: ../gramps/plugins/quickview/lineage.py:93
-#: ../gramps/plugins/textreport/familygroup.py:316
-#: ../gramps/plugins/textreport/familygroup.py:524
-#: ../gramps/plugins/textreport/familygroup.py:526
-#: ../gramps/plugins/textreport/tagreport.py:170
-#: ../gramps/plugins/webreport/person.py:231
-#: ../gramps/plugins/webreport/surname.py:142
+#: ../gramps/gen/lib/childreftype.py:68
+#, fuzzy
+#| msgid "Birth"
+msgctxt "relationship"
 msgid "Birth"
 msgstr "Народження"
 
-#: ../gramps/gen/lib/childreftype.py:69 ../gramps/gen/lib/eventtype.py:164
+#: ../gramps/gen/lib/childreftype.py:69
+#, fuzzy
+#| msgid "Adopted"
+msgctxt "relationship"
 msgid "Adopted"
 msgstr "Прийомний/на"
 
@@ -7577,6 +7556,27 @@ msgstr "Проживання"
 #: ../gramps/plugins/lib/maps/placeselection.py:200
 msgid "Other"
 msgstr "Інше"
+
+#: ../gramps/gen/lib/eventtype.py:164
+msgid "Adopted"
+msgstr "Прийомний/на"
+
+#: ../gramps/gen/lib/eventtype.py:165 ../gramps/gen/utils/symbols.py:93
+#: ../gramps/gui/configure.py:2230 ../gramps/gui/merge/mergeperson.py:189
+#: ../gramps/plugins/export/exportvcalendar.py:151
+#: ../gramps/plugins/gramplet/ancestor.py:65
+#: ../gramps/plugins/gramplet/descendant.py:63
+#: ../gramps/plugins/importer/importprogen.glade:1472
+#: ../gramps/plugins/quickview/all_relations.py:270
+#: ../gramps/plugins/quickview/lineage.py:93
+#: ../gramps/plugins/textreport/familygroup.py:316
+#: ../gramps/plugins/textreport/familygroup.py:524
+#: ../gramps/plugins/textreport/familygroup.py:526
+#: ../gramps/plugins/textreport/tagreport.py:170
+#: ../gramps/plugins/webreport/person.py:231
+#: ../gramps/plugins/webreport/surname.py:142
+msgid "Birth"
+msgstr "Народження"
 
 #: ../gramps/gen/lib/eventtype.py:166 ../gramps/gui/configure.py:2236
 #: ../gramps/gui/merge/mergeperson.py:194
@@ -15159,14 +15159,26 @@ msgid "Use regular expressions"
 msgstr "Вжити регулярний вираз"
 
 #: ../gramps/gui/editors/filtereditor.py:608
+#, fuzzy
+#| msgid ""
+#| "Interpret the contents of string fields as regular expressions.\n"
+#| "A decimal point will match any character. A question mark will match zero "
+#| "or one occurences of the previous character or group. An asterisk will "
+#| "match zero or more occurences. A plus sign will match one or more "
+#| "occurences. Use parentheses to group expressions. Specify alternatives "
+#| "using a vertical bar. A caret will match the start of a line. A dollar "
+#| "sign will match the end of a line."
 msgid ""
-"Interpret the contents of string fields as regular expressions.\n"
-"A decimal point will match any character. A question mark will match zero or "
-"one occurences of the previous character or group. An asterisk will match "
-"zero or more occurences. A plus sign will match one or more occurences. Use "
-"parentheses to group expressions. Specify alternatives using a vertical bar. "
-"A caret will match the start of a line. A dollar sign will match the end of "
-"a line."
+"Interpret the contents of string fields as regular expressions:\n"
+".\tA decimal point will match any character.\n"
+"?\tA question mark will match zero or one occurences of the previous "
+"character or group.\n"
+"*\tAn asterisk will match zero or more occurences.\n"
+"+\tA plus sign will match one or more occurences.\n"
+"()\tUse parentheses to group expressions.\n"
+"|\tSpecify alternatives using a vertical bar.\n"
+"^\tA caret will match the start of a line.\n"
+"$\tA dollar sign will match the end of a line."
 msgstr ""
 "Інтерпретувати вміст полів рядка як регулярний вираз.\n"
 "Десяткова крапка буде будь-яким символом. Знак питання буде нулем, або "
@@ -18727,27 +18739,37 @@ msgstr "Підсумок"
 msgid ""
 "The data will be exported as follows:\n"
 "\n"
-"Format:\t%s\n"
-"\n"
-"Press Apply to proceed, Back to revisit your options, or Cancel to abort"
+"Format:\t%s"
 msgstr ""
-"Дані буде експортовано так:\n"
-"\n"
-"Формат:\t%s\n"
-"\n"
-"Натисніть Застосувати, щоб продовжити, Скасувати для відміни, або Назад для "
-"зміни параметрів"
 
-#: ../gramps/gui/plug/export/_exportassistant.py:465
-#, python-format
+#: ../gramps/gui/plug/export/_exportassistant.py:455
+#: ../gramps/gui/plug/export/_exportassistant.py:470
+#, fuzzy
+#| msgid ""
+#| "Press Apply to proceed, Cancel to abort, or Back to revisit your options."
+msgid ""
+"Press Cancel to abort, Back to revisit your options, or Apply to proceed"
+msgstr ""
+"Натисніть Так для продовження, або Скасувати для скасування, або "
+"Повернутись, щоб переглянути параметри."
+
+#: ../gramps/gui/plug/export/_exportassistant.py:466
+#, fuzzy, python-format
+#| msgid ""
+#| "The data will be saved as follows:\n"
+#| "\n"
+#| "Format:\t%(format)s\n"
+#| "Name:\t%(name)s\n"
+#| "Folder:\t%(folder)s\n"
+#| "\n"
+#| "Press Apply to proceed, Go Back to revisit your options, or Cancel to "
+#| "abort"
 msgid ""
 "The data will be saved as follows:\n"
 "\n"
 "Format:\t%(format)s\n"
 "Name:\t%(name)s\n"
-"Folder:\t%(folder)s\n"
-"\n"
-"Press Apply to proceed, Go Back to revisit your options, or Cancel to abort"
+"Folder:\t%(folder)s"
 msgstr ""
 "Дані буде збережено наступним чином:\n"
 "\n"
@@ -18758,9 +18780,21 @@ msgstr ""
 "Натисніть Застосувати, щоб продовжити, Скасувати для відміни, або Назад для "
 "зміни параметрів"
 
+#: ../gramps/gui/plug/export/_exportassistant.py:468
+#, fuzzy
+#| msgid "=format"
+msgctxt "name"
+msgid "format"
+msgstr "=формат"
+
 #: ../gramps/gui/plug/export/_exportassistant.py:475
+#, fuzzy
+#| msgid ""
+#| "The selected file and folder to save to cannot be created or found.\n"
+#| "\n"
+#| "Press Back to return and select a valid filename."
 msgid ""
-"The selected file and folder to save to cannot be created or found.\n"
+"The selected file and folder to save cannot be created or found.\n"
 "\n"
 "Press Back to return and select a valid filename."
 msgstr ""
@@ -38749,6 +38783,28 @@ msgstr "Небраска"
 #: ../gramps/plugins/webstuff/webstuff.py:144
 msgid "No style sheet"
 msgstr "Без таблиці стилів"
+
+#, fuzzy
+#~| msgctxt "localized lexeme inflections"
+#~| msgid "January"
+#~ msgctxt "localized lexeme inflections"
+#~ msgid "|January"
+#~ msgstr "N=січень|G=січня"
+
+#, python-format
+#~ msgid ""
+#~ "The data will be exported as follows:\n"
+#~ "\n"
+#~ "Format:\t%s\n"
+#~ "\n"
+#~ "Press Apply to proceed, Back to revisit your options, or Cancel to abort"
+#~ msgstr ""
+#~ "Дані буде експортовано так:\n"
+#~ "\n"
+#~ "Формат:\t%s\n"
+#~ "\n"
+#~ "Натисніть Застосувати, щоб продовжити, Скасувати для відміни, або Назад "
+#~ "для зміни параметрів"
 
 #~ msgid ""
 #~ "Latitude (position above the Equator) of the place in decimal or degree "

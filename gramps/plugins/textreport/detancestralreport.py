@@ -37,6 +37,12 @@
 #
 #------------------------------------------------------------------------
 import math
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+import codecs
+import os
+import shutil
+import re
+#---------------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
 #
@@ -63,6 +69,10 @@ from gramps.plugins.lib.libnarrate import Narrator
 from gramps.gen.display.place import displayer as _pd
 from gramps.gen.proxy import CacheProxyDb
 from gramps.gen.display.name import displayer as _nd
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+from gramps.gen.utils.file import (media_path_full, create_checksum)
+from gramps.plugins.docgen.latexdoc import LaTeXDoc, latexescape
+#---------------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
 #
@@ -70,6 +80,32 @@ from gramps.gen.display.name import displayer as _nd
 #
 #------------------------------------------------------------------------
 EMPTY_ENTRY = "_____________"
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+latex_output_aq = []
+individual_aq = {
+    "ID"                : "",
+    "GrID"              : "",
+    "kekule"            : "",
+    "picture"           : "",
+    "displayname"       : "",
+    "nachname"          : "",
+    "vornamen"          : "",
+    "rufname"           : "",
+    "spitzname"         : "",
+    "titel"             : "",
+    "alias"             : "",
+    "suffix"            : "",
+    "geboren"           : "", 
+    "getauft"           : "", 
+    "gestorben"         : "", 
+    "begraben"          : "", 
+    "hochzeiten"        : "",
+    "notitzen"          : "",
+    "beruf"             : "",
+    "abstammung"        : "",
+    "partner"           : None
+    }
+#---------------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
 #
@@ -226,6 +262,9 @@ class DetAncestorReport(Report):
                     self.doc.page_break()
                 self.doc.start_paragraph("DAR-Generation")
                 text = self._("Generation %d") % (generation+1)
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                latex_output_aq.append("\\generation{" + text + "}")
+                #---------------------------------------------------------------------------------------------------
                 mark = IndexMark(text, INDEX_TYPE_TOC, 2)
                 self.doc.write_text(text, mark)
                 self.doc.end_paragraph()
@@ -237,6 +276,10 @@ class DetAncestorReport(Report):
             person_handle = self.map[key]
             person = self._db.get_person_from_handle(person_handle)
             self.gen_handles[person_handle] = key
+            # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+            for x in individual_aq:
+                individual_aq[x] = ""
+            #---------------------------------------------------------------------------------------------------
             dupperson = self.write_person(key)
             if dupperson == 0:      # Is this a duplicate ind record
                 if self.listchildren or self.inc_events:
@@ -253,6 +296,94 @@ class DetAncestorReport(Report):
                                 self.write_children(family)
                             if self.inc_events:
                                 self.write_family_events(family)
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                #Write biography (if this is not a duplicate)
+                bio_facts = ""
+                #Write Sosa-Stradonitz Numbering
+                bio_facts += "\\kekule{" + individual_aq["kekule"] + "}"
+                #Reset place ("ebenda")
+                bio_facts += "\\resetplace "
+                #Write Reference ID
+                bio_facts += "\\label{" + individual_aq["ID"] + "}"
+                #Write name
+                if (individual_aq["titel"] != ""):
+                    bio_facts += "\\titel{" + individual_aq["titel"] + "} "
+                if (individual_aq["nachname"] != ""):
+                    bio_facts += "\\nachname{" + individual_aq["nachname"] + "} "
+                alias = individual_aq["alias"]
+                if alias != "":
+                    alias = "(alias " + alias + ")"
+                    bio_facts += "\\alias{" + alias + "} "
+                if (individual_aq["suffix"] != ""):
+                    bio_facts += "\\suffix{" + individual_aq["suffix"] + "} "
+                bio_facts = bio_facts.strip()
+                bio_facts += ", "
+                if (individual_aq["rufname"] != ""):
+                    vornamen = individual_aq["vornamen"]
+                    vornamen = vornamen.replace(individual_aq["rufname"], "\\rufname{" + individual_aq["rufname"] + "}")
+                    bio_facts += vornamen
+                else:
+                    bio_facts += "\\vornamen{" + individual_aq["vornamen"] + "}"
+
+                #Write Index-entry (with cross reference when an alias name is present)
+                bio_facts += "\\index[ind]{" + individual_aq["nachname"]
+                if alias != "": bio_facts += " " + alias 
+                bio_facts += ", " + individual_aq["vornamen"] + "} "
+                if alias != "": 
+                    bio_facts += " " + "\\index[ind]{" + individual_aq["alias"] + ", " + individual_aq["vornamen"] + "|see{"
+                    bio_facts += individual_aq["nachname"] #cross reference to the name (without alias)
+                    bio_facts += "}}"
+
+                #Write Nickname
+                spitzname = individual_aq["spitzname"]
+                if spitzname != "":
+                    bio_facts += "(\\spitzname{" + spitzname + "}) "
+                bio_facts = bio_facts.strip()
+                bio_facts += ", "
+
+                #Write CV-Data
+                if (individual_aq["beruf"] != ""):
+                    bio_facts += "\\beruf{" + individual_aq["beruf"] + "}, "
+                if (individual_aq["geboren"] != ""):
+                    bio_facts += individual_aq["geboren"] + " "
+                bio_facts += individual_aq["abstammung"]
+                if (individual_aq["getauft"] != ""):
+                    bio_facts += individual_aq["getauft"] + " "
+                if (individual_aq["gestorben"] != ""):
+                    bio_facts += individual_aq["gestorben"] + " "
+                if (individual_aq["begraben"] != ""):
+                    bio_facts += individual_aq["begraben"] + " "
+                if  (bio_facts[-2] == ", "):
+                    bio_facts = bio_facts[:-2]
+                bio_facts += ". "
+
+                #Include picture
+                if individual_aq["picture"] != "":
+                    bio_facts += "\n " + individual_aq["picture"] +" \n "
+
+                #Include notes
+                if individual_aq["notitzen"] != "":
+                    bio_facts += individual_aq["notitzen"] + " " + "\\\\\n\n"
+                #Reset place ("ebenda")
+                bio_facts += "\\resetplace "
+                #Write partnerships
+                hochzeiten = individual_aq["hochzeiten"]
+                if (hochzeiten != ""):
+                    if not individual_aq["notitzen"]: bio_facts += " " + "\\\\\n\n"
+                    bio_facts += hochzeiten + " " + "\\\\\n\n"
+                #Insert newline if necessary
+                if (hochzeiten == "" and individual_aq["notitzen"] == ""):
+                    bio_facts += " " + "\\\\\n\n"
+                #Collect in Output string
+                bio_facts = bio_facts.replace("  ", " ")
+                bio_facts = re.sub(r"\. \.", ". ", bio_facts, 0, re.MULTILINE) #replace ". ."
+                bio_facts = re.sub(r",\.", ".", bio_facts, 0, re.MULTILINE) #replace ",."
+                bio_facts = re.sub(r" {2,}", " ", bio_facts, 0, re.MULTILINE) #double space
+                bio_facts = re.sub(r" +([,\.])([^\.])", r"\1\2", bio_facts, 0, re.MULTILINE) #spaces
+                bio_facts = re.sub(r"\.{2}", r".", bio_facts, 0, re.MULTILINE) #double .
+                bio_facts = re.sub(r"([0-9]+)\.([0-9]+)\.([\d]{4})", r"\\DTMdisplaydate{\3}{\2}{\1}{-1}", bio_facts)  #formats dates for Latex' DateTime2
+                latex_output_aq.append(bio_facts)
+                #---------------------------------------------------------------------------------------------------
 
         if self.inc_sources:
             if self.pgbrkenotes:
@@ -261,6 +392,22 @@ class DetAncestorReport(Report):
             endnotes.write_endnotes(self.bibli, self._db, self.doc,
                                     printnotes=self.inc_srcnotes,
                                     elocale=self._locale)
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        #Determine filename
+        output_path = "C:\\Users\\andreas.quentin\\OneDrive\\Documents\\Ahnenblatt\\07 LaTeX\\"
+        output_file_id = "latex-anc-" + self.normalize_string(self.center_person.get_nachname() + self.center_person.primary_name.first_name) + "-" + str(self.center_person.get_gramps_id())
+        #Write LaTeX Output
+        f = codecs.open(output_path + output_file_id + ".tex", "w+", encoding="utf-8")
+        #write intro for using this file as a subfile in latex
+        f.write("""\\documentclass[00-Maindoc]{subfiles}\n
+        \\begin{document}\n\n
+        """)
+        for i in range(len(latex_output_aq)):
+            f.write(latex_output_aq[i])
+        #write outro
+        f.write("\n\\end{document}")
+        f.close()
+        #---------------------------------------------------------------------------------------------------
 
     def _get_s_s(self, key):
         """returns Sosa-Stradonitz (a.k.a. Kekule or Ahnentafel) number"""
@@ -271,6 +418,11 @@ class DetAncestorReport(Report):
 
     def write_person(self, key):
         """ Output birth, death, parentage, marriage and notes information """
+
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        for x in individual_aq:
+            individual_aq[x] = ""
+        #---------------------------------------------------------------------------------------------------
 
         def write_more_header(first, name):
             """ convenience function """
@@ -291,7 +443,9 @@ class DetAncestorReport(Report):
             utils.insert_image(self._db, self.doc, photo, self._user)
 
         self.doc.start_paragraph("DAR-First-Entry", "%d." % self._get_s_s(key))
-
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        individual_aq["kekule"] = str(self._get_s_s(key))
+        #---------------------------------------------------------------------------------------------------
         name = self._nd.display(person)
         if not name:
             name = self._("Unknown")
@@ -299,6 +453,111 @@ class DetAncestorReport(Report):
 
         self.doc.start_bold()
         self.doc.write_text(name, mark)
+
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        individual_aq["displayname"] = name
+        surnames = person.primary_name.surname_list
+        if (len(surnames)>0):
+            individual_aq["alias"] = surnames[0].prefix
+            individual_aq["nachname"] = surnames[0].surname
+        individual_aq["vornamen"] = person.primary_name.first_name
+        individual_aq["rufname"] = person.primary_name.call
+        individual_aq["spitzname"] = person.primary_name.nick
+        individual_aq["titel"] = LaTeXDoc.transform_abbreviations(person.primary_name.title)
+        individual_aq["suffix"] = person.primary_name.suffix
+        event_refs = person.get_primary_event_ref_list()
+        events = [event for event in
+                    [self._db.get_event_from_handle(ref.ref) for ref in event_refs]
+                    if event.get_type() == EventType(EventType.OCCUPATION)]
+        if len(events) > 0:
+            events.sort(key=lambda x: x.get_date_object())
+            occupation = events[-1].get_description()
+            if occupation:
+                individual_aq["beruf"] = LaTeXDoc.transform_abbreviations(occupation)
+
+        individual_aq["GrID"] = str(person.get_gramps_id())
+        individual_aq["ID"] = person.get_latex_id()
+
+        #if self.addimages and len(plist) > 0:
+        if True and len(plist) > 0:
+            photo = plist[0] #only first image!
+            #utils.insert_image(self._db, self.doc, photo, self._user)
+            object_handle = photo.get_reference_handle()
+            media = self._db.get_media_from_handle(object_handle)
+            mime_type = media.get_mime_type()
+            if mime_type and mime_type.startswith("image"):
+                filename = media_path_full(self._db, media.get_path())
+                caption = media.get_description()
+                if self.normalize_string(caption) in self.normalize_string(filename): #caption is filename, replace by person's name
+                    caption = individual_aq["titel"] + " " + individual_aq["vornamen"] + " " + individual_aq["nachname"] + " " + individual_aq["suffix"]
+                    caption = caption.strip()
+
+                checksum = media.get_checksum()
+                if not checksum:
+                    checksum = create_checksum(filename)
+                    media.set_checksum(checksum)
+                filename_new_short = self.normalize_string(individual_aq["nachname"]+individual_aq["vornamen"]) + "-" + str(checksum) + "-" + individual_aq["GrID"]
+                label = "pic-" + filename_new_short
+                filename_new = "C:\\Users\\andreas.quentin\\OneDrive\Documents\Ahnenblatt\\07 LaTeX\\pics\\" + filename_new_short + ".jpg"
+                if os.path.exists(filename):
+                    shutil.copy(filename,filename_new)
+                    latex_image = ""
+                    latex_image += "\\IfFileExists{./%s}{\n" % latexescape("pics/" + filename_new_short)
+                    latex_image += "\\begin{figure}[t] \n"
+                    latex_image += "\\centering \n"
+                    latex_image += "\\includegraphics[width=1\\linewidth]{%s} \n" % latexescape("pics/" + filename_new_short)
+                    latex_image += "\\caption[%s]{%s} \n" % (caption, caption)
+                    latex_image += "\\label{fig:%s} \n" % label
+                    latex_image += "\\end{figure}\n"
+                    latex_image += "}{\\typeout{Image source file not found %s}}" % latexescape("pics/" + filename_new_short)
+                    individual_aq["picture"] = latex_image
+        write_parents = True
+        if write_parents:
+            geschlecht = person.get_gender() #Person.MALE / Person.FEMALE / Person.UNKNOWN
+            if geschlecht == Person.MALE:
+                geschlecht_text = "Sohn"
+            elif geschlecht == Person.FEMALE:
+                geschlecht_text = "Tochter"
+            else:
+                geschlecht_text = "Kind"
+            family_handle = person.get_main_parents_family_handle()
+            if family_handle:
+                family = self._db.get_family_from_handle(family_handle)
+                mother_handle = family.get_mother_handle()
+                father_handle = family.get_father_handle()
+                if mother_handle:
+                    mother = self._db.get_person_from_handle(mother_handle)
+                    mother_name = mother.primary_name.first_name + " "
+                    spitzname = mother.primary_name.nick
+                    if spitzname: mother_name += "\\spitzname{" + spitzname + "} "
+                    mother_name += mother.get_nachname()
+                    mother_name = mother_name.strip()
+                    mother_id = mother.get_latex_id()
+                else:
+                    mother_name = ""
+                    mother_id = ""
+                if father_handle:
+                    father = self._db.get_person_from_handle(father_handle)
+                    father_name = father.primary_name.first_name + " "
+                    spitzname = father.primary_name.nick
+                    if spitzname: father_name += "\\spitzname{" + spitzname + "} "
+                    father_name += father.get_nachname()
+                    father_name = father_name.strip()
+                    father_id = father.get_latex_id()
+                else:
+                    father_name = ""
+                    father_id = ""
+                eltern_text = ""
+                if mother_name or father_name:
+                    eltern_text = geschlecht_text + " "
+                    if mother_name: eltern_text += "der \\hyperref[" + mother_id + "]{" + mother_name + "}\seitenzahl{" + mother_id + "} "
+                    if mother_name and father_name: eltern_text += "und "
+                    if father_name: eltern_text += "des \\hyperref[" + father_id + "]{" + father_name + "}\seitenzahl{" + father_id + "} "
+                    eltern_text = eltern_text.strip()
+                    eltern_text += ". "
+                individual_aq["abstammung"] = eltern_text
+        #---------------------------------------------------------------------------------------------------
+
         if name[-1:] == '.':
             self.doc.write_text_citation("%s " % self.endnotes(person))
         elif name:
@@ -316,6 +575,17 @@ class DetAncestorReport(Report):
                     self.doc.write_text(
                         self._("%(name)s is the same person as [%(id_str)s]."
                               ) % {'name' : '', 'id_str' : str(dkey)})
+                    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                    indiv = self._db.get_person_from_handle(self.map[key])
+                    indiv_sosa = self._get_s_s(key)
+                    dublette = self._db.get_person_from_handle(self.map[dkey])
+                    dublette_sosa = self._get_s_s(dkey)
+                    text = "\\kekule{" + str(indiv_sosa) + "} =\enskip{}"
+                    text += "\hyperref["+ dublette.get_latex_id() + "]{"
+                    text += "\kekule{" + str(dublette_sosa) + "}" + name
+                    text += "}\seitenzahlpunkte{" + dublette.get_latex_id() + "}"
+                    latex_output_aq.append(text + " " + "\n\n")
+                    #---------------------------------------------------------------------------------------------------
                     self.doc.end_paragraph()
                     return 1    # Duplicate person
 
@@ -325,10 +595,16 @@ class DetAncestorReport(Report):
         text = self.__narrator.get_born_string()
         if text:
             self.doc.write_text_citation(text)
+            # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+            individual_aq["geboren"] = LaTeXDoc.transform_abbreviations(text)
+            #---------------------------------------------------------------------------------------------------
 
         text = self.__narrator.get_baptised_string()
         if text:
             self.doc.write_text_citation(text)
+            # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+            individual_aq["getauft"] = LaTeXDoc.transform_abbreviations(text)
+            #---------------------------------------------------------------------------------------------------
 
         text = self.__narrator.get_christened_string()
         if text:
@@ -339,16 +615,23 @@ class DetAncestorReport(Report):
             text = self.__narrator.get_died_string(self.calcageflag)
             if text:
                 self.doc.write_text_citation(text)
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                individual_aq["gestorben"] = LaTeXDoc.transform_abbreviations(text)
+                #---------------------------------------------------------------------------------------------------
 
             text = self.__narrator.get_buried_string()
             if text:
                 self.doc.write_text_citation(text)
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                individual_aq["begraben"] = LaTeXDoc.transform_abbreviations(text)
+                #---------------------------------------------------------------------------------------------------
 
         if self.verbose:
             self.write_parents(person)
 
         if not key % 2 or key == 1:
             self.write_marriage(person)
+            # TODO: Hochzeiten werden nur bei den Männern ausgegeben. Falls die Frauen mehrmals verh. waren, sollte dies ausgegeben werden können.
         self.doc.end_paragraph()
 
         if key == 1:
@@ -360,6 +643,9 @@ class DetAncestorReport(Report):
             # feature request 2356: avoid genitive form
             self.doc.write_text(self._("Notes for %s") % name)
             self.doc.end_paragraph()
+            # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+            note_counter = 0
+            #---------------------------------------------------------------------------------------------------
             for notehandle in notelist:
                 note = self._db.get_note_from_handle(notehandle)
                 self.doc.write_styled_note(
@@ -368,6 +654,15 @@ class DetAncestorReport(Report):
                     "DAR-Entry",
                     contains_html=(note.get_type() == NoteType.HTML_CODE)
                     )
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                individual_aq["notitzen"] += (self.doc.write_styled_note_aq(
+                    note.get_styledtext(),
+                    False,
+                    "DAR-Entry",
+                    contains_html=(note.get_type() == NoteType.HTML_CODE)))
+                note_counter += 1
+                if note_counter < len(notelist): individual_aq["notitzen"] += "\\\\\r"
+                #---------------------------------------------------------------------------------------------------
 
         first = True
         if self.inc_names:
@@ -518,6 +813,12 @@ class DetAncestorReport(Report):
                     contains_html=(note.get_type() == NoteType.HTML_CODE)
                     )
 
+    # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+    def normalize_string(self, text):
+        output = re.sub(r'[\\/: \_\-!\?.%öäüÄÖÜß#,\(\)|]*', r'', text)
+        return output 
+    #---------------------------------------------------------------------------------------------------
+
     def write_parents(self, person):
         """ write the parents """
         family_handle = person.get_main_parents_family_handle()
@@ -553,6 +854,10 @@ class DetAncestorReport(Report):
         Output marriage sentence.
         """
         is_first = True
+        # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+        hochzeit_nr = 0
+        anzahl_hochzeiten = len(person.get_family_handle_list())
+        #---------------------------------------------------------------------------------------------------
         for family_handle in person.get_family_handle_list():
             family = self._db.get_family_from_handle(family_handle)
             spouse_handle = utils.find_spouse(person, family)
@@ -567,6 +872,36 @@ class DetAncestorReport(Report):
                                                       self._nd)
             if text:
                 self.doc.write_text_citation(text, spouse_mark)
+                # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+                text = LaTeXDoc.transform_abbreviations(text)
+                hochzeit_nr += 1
+                if anzahl_hochzeiten > 1:
+                    text = "\\circled{" + str(hochzeit_nr) + "}\\," + text
+
+                kinder_text = ""
+                kinder = family.get_child_ref_list()
+                if len(kinder)>0:
+                    count = 1
+                    for kind_ref in kinder:
+                        child_handle = kind_ref.ref
+                        kind = self._db.get_person_from_handle(child_handle)
+                        kind_vorname = kind.primary_name.first_name
+                        kind_spitzname = kind.primary_name.nick
+                        kinder_text += "\\hyperref["+kind.get_latex_id()+"]{"
+                        if len(kinder) > 1:
+                            kinder_text += "("+str(count)+")~"
+                        kinder_text += kind_vorname
+                        if kind_spitzname:
+                            kinder_text += " \\spitzname{" + kind_spitzname + "}"
+                        kinder_text += "}\seitenzahl{" + kind.get_latex_id() + "}"
+                        if count < len(kinder): kinder_text += ", "
+                        if count== len(kinder): kinder_text += ". "
+                        count += 1
+                if kinder_text: text += " Kinder: " + kinder_text
+
+                if hochzeit_nr < anzahl_hochzeiten: text += "" + "\n\n"
+                individual_aq["hochzeiten"] += text
+                #---------------------------------------------------------------------------------------------------
                 if self.want_ids:
                     self.doc.write_text(' (%s)' % family.get_gramps_id())
                 is_first = False

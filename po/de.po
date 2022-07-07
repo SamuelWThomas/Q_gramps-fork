@@ -22,7 +22,7 @@ msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-02-25 22:46+0000\n"
-"PO-Revision-Date: 2022-03-11 23:38+0000\n"
+"PO-Revision-Date: 2022-07-07 10:44+0200\n"
 "Last-Translator: Mirko Leonhäuser <mirko@leonhaeuser.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/gramps-project/"
 "gramps/de/>\n"
@@ -31,7 +31,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.12-dev\n"
+"X-Generator: Poedit 3.0\n"
 
 #: ../data/holidays.xml:3
 msgid "Bulgaria"
@@ -27613,9 +27613,9 @@ msgid "She was born on %(birth_date)s in %(birth_place)s."
 msgstr "Sie wurde am %(birth_date)s in %(birth_place)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:97
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(birth_date)s in %(birth_place)s."
-msgstr "Geboren %(birth_date)s in %(birth_place)s."
+msgstr "\\geb\\,%(birth_date)s, \\place{%(birth_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:102
 #, python-format
@@ -27649,9 +27649,9 @@ msgid "She was born %(modified_date)s in %(birth_place)s."
 msgstr "Sie wurde %(modified_date)s in %(birth_place)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:111
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(modified_date)s in %(birth_place)s."
-msgstr "Geboren %(modified_date)s in %(birth_place)s."
+msgstr "\\geb\\,%(modified_date)s, \\place{%(birth_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:116
 #, python-format
@@ -27684,9 +27684,9 @@ msgid "She was born on %(birth_date)s."
 msgstr "Sie wurde am %(birth_date)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:125
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(birth_date)s."
-msgstr "Geboren %(birth_date)s."
+msgstr "\\geb\\,%(birth_date)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:130
 #, python-format
@@ -27719,9 +27719,9 @@ msgid "She was born %(modified_date)s."
 msgstr "Sie wurde %(modified_date)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:139
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(modified_date)s."
-msgstr "Geboren %(modified_date)s."
+msgstr "\\geb\\,%(modified_date)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:144
 #, python-format
@@ -27755,9 +27755,9 @@ msgid "She was born in %(month_year)s in %(birth_place)s."
 msgstr "Sie wurde %(month_year)s in %(birth_place)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:153
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(month_year)s in %(birth_place)s."
-msgstr "Geboren %(month_year)s in %(birth_place)s."
+msgstr "\\geb\\,%(month_year)s, \\place{%(birth_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:158
 #, python-format
@@ -27790,9 +27790,9 @@ msgid "She was born in %(month_year)s."
 msgstr "Sie wurde %(month_year)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:167
-#, python-format
+#, fuzzy, python-format
 msgid "Born %(month_year)s."
-msgstr "Geboren %(month_year)s."
+msgstr "\\geb\\,%(month_year)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:172
 #, python-format
@@ -27825,9 +27825,9 @@ msgid "She was born in %(birth_place)s."
 msgstr "Sie wurde in %(birth_place)s geboren."
 
 #: ../gramps/plugins/lib/libnarrate.py:181
-#, python-format
+#, fuzzy, python-format
 msgid "Born in %(birth_place)s."
-msgstr "Geboren in %(birth_place)s."
+msgstr "\\geb\\,\\place{%(birth_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:191
 #, python-format
@@ -27905,15 +27905,15 @@ msgstr "Sie starb am %(death_date)s in %(death_place)s im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:217
 #: ../gramps/plugins/lib/libnarrate.py:250
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(death_date)s in %(death_place)s."
-msgstr "Starb %(death_date)s in %(death_place)s."
+msgstr "\\tod\\,%(death_date)s, \\place{%(death_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:218
 #: ../gramps/plugins/lib/libnarrate.py:251
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(death_date)s in %(death_place)s (%(age)s)."
-msgstr "Starb %(death_date)s in %(death_place)s (mit %(age)s)."
+msgstr "\\tod\\,%(death_date)s, \\place{%(death_place)s} (%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:224
 #, python-format
@@ -28049,15 +28049,15 @@ msgstr "Sie starb am %(death_date)s im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:283
 #: ../gramps/plugins/lib/libnarrate.py:316
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(death_date)s."
-msgstr "Starb %(death_date)s."
+msgstr "\\tod\\,%(death_date)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:284
 #: ../gramps/plugins/lib/libnarrate.py:317
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(death_date)s (%(age)s)."
-msgstr "Starb %(death_date)s (mit %(age)s)."
+msgstr "\\tod\\,%(death_date)s (%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:290
 #, python-format
@@ -28194,14 +28194,14 @@ msgid "She died in %(month_year)s in %(death_place)s at the age of %(age)s."
 msgstr "Sie starb im %(month_year)s in %(death_place)s im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:349
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(month_year)s in %(death_place)s."
-msgstr "Starb %(month_year)s in %(death_place)s."
+msgstr "\\tod\\,%(month_year)s, \\place{%(death_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:350
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(month_year)s in %(death_place)s (%(age)s)."
-msgstr "Starb %(month_year)s in %(death_place)s (mit %(age)s)."
+msgstr "\\tod\\,%(month_year)s, \\place{%(death_place)s} (%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:356
 #, python-format
@@ -28264,14 +28264,14 @@ msgid "She died in %(month_year)s at the age of %(age)s."
 msgstr "Sie starb im %(month_year)s im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:382
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(month_year)s."
-msgstr "Starb %(month_year)s."
+msgstr "\\tod\\,%(month_year)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:383
-#, python-format
+#, fuzzy, python-format
 msgid "Died %(month_year)s (%(age)s)."
-msgstr "Starb %(month_year)s (mit %(age)s)."
+msgstr "\\tod\\,%(month_year)s (%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:389
 #, python-format
@@ -28334,14 +28334,14 @@ msgid "She died in %(death_place)s at the age of %(age)s."
 msgstr "Sie starb in %(death_place)s im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:416
-#, python-format
+#, fuzzy, python-format
 msgid "Died in %(death_place)s."
-msgstr "Starb in %(death_place)s."
+msgstr "\\tod\\,\\place{%(death_place)s},"
 
 #: ../gramps/plugins/lib/libnarrate.py:417
-#, python-format
+#, fuzzy, python-format
 msgid "Died in %(death_place)s (%(age)s)."
-msgstr "Starb in %(death_place)s (mit %(age)s)."
+msgstr "\\tod\\,\\place{%(death_place)s} (%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:424
 #, python-format
@@ -28374,9 +28374,9 @@ msgid "She died at the age of %(age)s."
 msgstr "Sie starb im Alter von %(age)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:450
-#, python-format
+#, fuzzy, python-format
 msgid "Died (%(age)s)."
-msgstr "Starb (%(age)s)."
+msgstr "\\tod\\,(%(age)s),"
 
 #: ../gramps/plugins/lib/libnarrate.py:461
 #, python-format
@@ -28422,9 +28422,9 @@ msgstr ""
 "Die Person wurde am %(burial_date)s in %(burial_place)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:472
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(burial_date)s in %(burial_place)s%(endnotes)s."
-msgstr "Begraben am %(burial_date)s in %(burial_place)s%(endnotes)s."
+msgstr "\\begraben\\,%(burial_date)s, \\place{%(burial_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:477
 #, python-format
@@ -28457,9 +28457,9 @@ msgid "This person was buried on %(burial_date)s%(endnotes)s."
 msgstr "Die Person wurde am %(burial_date)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:488
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(burial_date)s%(endnotes)s."
-msgstr "Begraben am %(burial_date)s%(endnotes)s."
+msgstr "\\begraben\\,%(burial_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:493
 #, python-format
@@ -28503,9 +28503,9 @@ msgstr ""
 "Die Person wurde %(month_year)s in %(burial_place)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:504
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(month_year)s in %(burial_place)s%(endnotes)s."
-msgstr "Begraben %(month_year)s in %(burial_place)s%(endnotes)s."
+msgstr "\\begraben\\,%(month_year)s, \\place{%(burial_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:509
 #, python-format
@@ -28538,9 +28538,9 @@ msgid "This person was buried in %(month_year)s%(endnotes)s."
 msgstr "Die Person wurde %(month_year)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:520
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(month_year)s%(endnotes)s."
-msgstr "Begraben %(month_year)s%(endnotes)s."
+msgstr "\\begraben\\,%(month_year)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:525
 #, python-format
@@ -28585,9 +28585,9 @@ msgstr ""
 "Die Person wurde %(modified_date)s in %(burial_place)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:536
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(modified_date)s in %(burial_place)s%(endnotes)s."
-msgstr "Begraben %(modified_date)s in %(burial_place)s%(endnotes)s."
+msgstr "\\begraben\\,%(modified_date)s, \\place{%(burial_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:541
 #, python-format
@@ -28620,9 +28620,9 @@ msgid "This person was buried %(modified_date)s%(endnotes)s."
 msgstr "Die Person wurde %(modified_date)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:552
-#, python-format
+#, fuzzy, python-format
 msgid "Buried %(modified_date)s%(endnotes)s."
-msgstr "Begraben %(modified_date)s%(endnotes)s."
+msgstr "\\begraben\\,%(modified_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:557
 #, python-format
@@ -28656,9 +28656,9 @@ msgid "This person was buried in %(burial_place)s%(endnotes)s."
 msgstr "Die Person wurde in %(burial_place)s%(endnotes)s begraben."
 
 #: ../gramps/plugins/lib/libnarrate.py:568
-#, python-format
+#, fuzzy, python-format
 msgid "Buried in %(burial_place)s%(endnotes)s."
-msgstr "Begraben in %(burial_place)s%(endnotes)s."
+msgstr "\\begraben\\,\\place{%(burial_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:573
 #, python-format
@@ -28691,9 +28691,9 @@ msgid "This person was buried%(endnotes)s."
 msgstr "Diese Person wurde begraben%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:584
-#, python-format
+#, fuzzy, python-format
 msgid "Buried%(endnotes)s."
-msgstr "Begraben %(endnotes)s."
+msgstr "\\begraben\\ %(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:594
 #, python-format
@@ -28743,9 +28743,9 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:605
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(baptism_date)s in %(baptism_place)s%(endnotes)s."
-msgstr "Getauft %(baptism_date)s in %(baptism_place)s%(endnotes)s."
+msgstr "\\taufe\\,%(baptism_date)s, \\place{%(baptism_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:610
 #, python-format
@@ -28778,9 +28778,9 @@ msgid "This person was baptized on %(baptism_date)s%(endnotes)s."
 msgstr "Diese Person wurde getauft am %(baptism_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:621
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(baptism_date)s%(endnotes)s."
-msgstr "Getauft %(baptism_date)s%(endnotes)s."
+msgstr "\\taufe\\,%(baptism_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:626
 #, python-format
@@ -28826,9 +28826,9 @@ msgstr ""
 "Diese Person wurde getauft %(month_year)s in %(baptism_place)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:637
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(month_year)s in %(baptism_place)s%(endnotes)s."
-msgstr "Getauft %(month_year)s in %(baptism_place)s%(endnotes)s."
+msgstr "\\taufe\\,%(month_year)s, \\place{%(baptism_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:642
 #, python-format
@@ -28861,9 +28861,9 @@ msgid "This person was baptized in %(month_year)s%(endnotes)s."
 msgstr "Diese Person wurde getauft %(month_year)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:653
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(month_year)s%(endnotes)s."
-msgstr "Getauft %(month_year)s%(endnotes)s."
+msgstr "\\taufe\\,%(month_year)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:658
 #, python-format
@@ -28911,9 +28911,9 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:669
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(modified_date)s in %(baptism_place)s%(endnotes)s."
-msgstr "Getauft %(modified_date)s in %(baptism_place)s%(endnotes)s."
+msgstr "\\taufe\\,%(modified_date)s, \\place{%(baptism_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:674
 #, python-format
@@ -28946,9 +28946,9 @@ msgid "This person was baptized %(modified_date)s%(endnotes)s."
 msgstr "Diese Person wurde getauft %(modified_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:685
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized %(modified_date)s%(endnotes)s."
-msgstr "Getauft %(modified_date)s%(endnotes)s."
+msgstr "\\taufe\\,%(modified_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:690
 #, python-format
@@ -28982,9 +28982,9 @@ msgid "This person was baptized in %(baptism_place)s%(endnotes)s."
 msgstr "Diese Person wurde getauft in %(baptism_place)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:701
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized in %(baptism_place)s%(endnotes)s."
-msgstr "Getauft in %(baptism_place)s%(endnotes)s."
+msgstr "\\taufe\\,\\place{%(baptism_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:706
 #, python-format
@@ -29017,9 +29017,9 @@ msgid "This person was baptized%(endnotes)s."
 msgstr "Diese Person wurde getauft%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:717
-#, python-format
+#, fuzzy, python-format
 msgid "Baptized%(endnotes)s."
-msgstr "Getauft %(endnotes)s."
+msgstr "\\taufe\\ %(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:727
 #, python-format
@@ -29076,9 +29076,10 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:738
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(christening_date)s in %(christening_place)s%(endnotes)s."
-msgstr "Getauft %(christening_date)s in %(christening_place)s%(endnotes)s."
+msgstr ""
+"\\taufe\\,%(christening_date)s, \\place{%(christening_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:743
 #, python-format
@@ -29113,9 +29114,9 @@ msgid "This person was christened on %(christening_date)s%(endnotes)s."
 msgstr "Diese Person wurde getauft am %(christening_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:754
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(christening_date)s%(endnotes)s."
-msgstr "Getauft %(christening_date)s%(endnotes)s."
+msgstr "\\taufe\\,%(christening_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:759
 #, python-format
@@ -29166,9 +29167,9 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:770
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(month_year)s in %(christening_place)s%(endnotes)s."
-msgstr "Getauft %(month_year)s in %(christening_place)s%(endnotes)s."
+msgstr "\\taufe\\,%(month_year)s, \\place{%(christening_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:775
 #, python-format
@@ -29201,9 +29202,9 @@ msgid "This person was christened in %(month_year)s%(endnotes)s."
 msgstr "Diese Person wurde getauft %(month_year)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:786
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(month_year)s%(endnotes)s."
-msgstr "Getauft %(month_year)s%(endnotes)s."
+msgstr "\\taufe\\,%(month_year)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:791
 #, python-format
@@ -29256,9 +29257,10 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:802
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(modified_date)s in %(christening_place)s%(endnotes)s."
-msgstr "Getauft %(modified_date)s in %(christening_place)s%(endnotes)s."
+msgstr ""
+"\\taufe\\,%(modified_date)s, \\place{%(christening_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:807
 #, python-format
@@ -29291,9 +29293,9 @@ msgid "This person was christened %(modified_date)s%(endnotes)s."
 msgstr "Diese Person wurde getauft %(modified_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:818
-#, python-format
+#, fuzzy, python-format
 msgid "Christened %(modified_date)s%(endnotes)s."
-msgstr "Getauft %(modified_date)s%(endnotes)s."
+msgstr "\\taufe\\,%(modified_date)s%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:823
 #, python-format
@@ -29328,9 +29330,9 @@ msgid "This person was christened in %(christening_place)s%(endnotes)s."
 msgstr "Diese Person wurde getauft in %(christening_place)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:834
-#, python-format
+#, fuzzy, python-format
 msgid "Christened in %(christening_place)s%(endnotes)s."
-msgstr "Getauft in %(christening_place)s%(endnotes)s."
+msgstr "\\taufe\\,\\place{%(christening_place)s}%(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:839
 #, python-format
@@ -29363,9 +29365,9 @@ msgid "This person was christened%(endnotes)s."
 msgstr "Diese Person wurde getauft%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:850
-#, python-format
+#, fuzzy, python-format
 msgid "Christened%(endnotes)s."
-msgstr "Getauft%(endnotes)s."
+msgstr "\\taufe\\ %(endnotes)s,"
 
 #: ../gramps/plugins/lib/libnarrate.py:861
 #, python-format
@@ -30507,20 +30509,22 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1239
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s %(partial_date)s in %(place)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s im %(partial_date)s in %(place)s%(endnotes)s."
+msgstr ""
+"\\partner\\,%(spouse)s, %(partial_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1240
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s %(full_date)s in %(place)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s am %(full_date)s in %(place)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(full_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1241
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Relationship with %(spouse)s %(modified_date)s in %(place)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s %(modified_date)s in %(place)s%(endnotes)s."
+msgstr ""
+"\\partner\\,%(spouse)s, %(modified_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1247
 #, python-format
@@ -30604,27 +30608,24 @@ msgstr ""
 "%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1262
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Also relationship with %(spouse)s %(partial_date)s in %(place)s%(endnotes)s."
 msgstr ""
-"Auch eine Beziehung mit %(spouse)s im %(partial_date)s in %(place)s"
-"%(endnotes)s."
+"\\partner\\,%(spouse)s, %(partial_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1263
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Also relationship with %(spouse)s %(full_date)s in %(place)s%(endnotes)s."
-msgstr ""
-"Auch eine Beziehung mit %(spouse)s am %(full_date)s in %(place)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(full_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1264
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Also relationship with %(spouse)s %(modified_date)s in %(place)s%(endnotes)s."
 msgstr ""
-"Auch eine Beziehung mit %(spouse)s %(modified_date)s in %(place)s"
-"%(endnotes)s."
+"\\partner\\,%(spouse)s, %(modified_date)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1270
 #, python-format
@@ -30684,19 +30685,19 @@ msgid "She had a relationship with %(spouse)s %(modified_date)s%(endnotes)s."
 msgstr "Sie hatte eine Beziehung mit %(spouse)s %(modified_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1285
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s %(partial_date)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s im %(partial_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(partial_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1286
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s %(full_date)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s am %(full_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(full_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1287
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s %(modified_date)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s %(modified_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(modified_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1293
 #, python-format
@@ -30768,19 +30769,19 @@ msgstr ""
 "Sie hatte auch eine Beziehung mit %(spouse)s %(modified_date)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1308
-#, python-format
+#, fuzzy, python-format
 msgid "Also relationship with %(spouse)s %(partial_date)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s im %(partial_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(partial_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1309
-#, python-format
+#, fuzzy, python-format
 msgid "Also relationship with %(spouse)s %(full_date)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s am %(full_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(full_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1310
-#, python-format
+#, fuzzy, python-format
 msgid "Also relationship with %(spouse)s %(modified_date)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s %(modified_date)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, %(modified_date)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1315
 #, python-format
@@ -30800,9 +30801,9 @@ msgid "She had a relationship with %(spouse)s in %(place)s%(endnotes)s."
 msgstr "Sie hatte auch eine Beziehung mit %(spouse)s in %(place)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1318
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s in %(place)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s in %(place)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1322
 #, python-format
@@ -30823,9 +30824,9 @@ msgid "She also had a relationship with %(spouse)s in %(place)s%(endnotes)s."
 msgstr "Sie hatte auch eine Beziehung mit %(spouse)s in %(place)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1325
-#, python-format
+#, fuzzy, python-format
 msgid "Also relationship with %(spouse)s in %(place)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s in %(place)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s, \\place{%(place)s}%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1329
 #, python-format
@@ -30843,9 +30844,9 @@ msgid "She had a relationship with %(spouse)s%(endnotes)s."
 msgstr "Sie hatte eine Beziehung mit %(spouse)s%(endnotes)s."
 
 #: ../gramps/plugins/lib/libnarrate.py:1332
-#, python-format
+#, fuzzy, python-format
 msgid "Relationship with %(spouse)s%(endnotes)s."
-msgstr "Beziehung mit %(spouse)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libnarrate.py:1336
 #, python-format
@@ -30863,9 +30864,9 @@ msgid "She also had a relationship with %(spouse)s%(endnotes)s."
 msgstr "Sie hatte auch eine Beziehung mit %(spouse)s%(endnotes)s.."
 
 #: ../gramps/plugins/lib/libnarrate.py:1339
-#, python-format
+#, fuzzy, python-format
 msgid "Also relationship with %(spouse)s%(endnotes)s."
-msgstr "Auch eine Beziehung mit %(spouse)s%(endnotes)s."
+msgstr "\\partner\\,%(spouse)s%(endnotes)s"
 
 #: ../gramps/plugins/lib/libpersonview.py:106
 #: ../gramps/plugins/lib/libpersonview.py:104

@@ -447,3 +447,53 @@ plg.category = CATEGORY_TEXT
 plg.reportclass = 'NoteLinkReport'
 plg.optionclass = 'NoteLinkOptions'
 plg.report_modes = [REPORT_MODE_GUI, REPORT_MODE_CLI, REPORT_MODE_BKI]
+
+# ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+plg = newplugin()
+plg.id = 'obsidianreport'
+plg.name = _("Obsidian Report")
+plg.description = _("Save all persons to Obsidian Markdown Files")
+plg.version = '1.0'
+plg.gramps_target_version = MODULE_VERSION
+plg.status = STABLE
+plg.fname = 'obsidianreport.py'
+plg.ptype = REPORT
+plg.authors = ["Sam Thomas"]
+plg.authors_email = ["Sam Thomas"]
+plg.category = CATEGORY_TEXT
+plg.reportclass = 'ObsidianReport'
+plg.optionclass = 'ObsidianReportOptions'
+plg.report_modes = [REPORT_MODE_GUI, REPORT_MODE_CLI]
+
+plg = newplugin()
+plg.id = 'LaTeX-Report-down'
+plg.name = _("LaTeX Report (downwards)")
+plg.description = _("Export Descendants to LaTeX")
+plg.version = '1.0'
+plg.gramps_target_version = MODULE_VERSION
+plg.status = STABLE
+plg.fname = 'latex_down.py'
+plg.ptype = REPORT
+plg.authors = ["Sam Thomas"]
+plg.authors_email = ["Sam Thomas"]
+plg.category = CATEGORY_TEXT
+plg.reportclass = 'LatexDownReport'
+plg.optionclass = 'LatexDownOptions'
+plg.report_modes = [REPORT_MODE_GUI, REPORT_MODE_CLI, REPORT_MODE_BKI]
+
+plg = newplugin()
+plg.id = 'LaTeX-Report-up'
+plg.name = _("LaTeX Report (upwards)")
+plg.description = _("Export Ancestors to LaTeX")
+plg.version = '1.0'
+plg.gramps_target_version = MODULE_VERSION
+plg.status = STABLE
+plg.fname = 'latex_up.py'
+plg.ptype = REPORT
+plg.authors = ["Sam Thomas"]
+plg.authors_email = ["Sam Thomas"]
+plg.category = CATEGORY_TEXT
+plg.reportclass = 'LatexUpReport'
+plg.optionclass = 'LatexUpOptions'
+plg.report_modes = [REPORT_MODE_GUI, REPORT_MODE_CLI, REPORT_MODE_BKI]
+#---------------------------------------------------------------------------------------------------

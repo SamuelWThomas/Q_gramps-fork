@@ -5,16 +5,13 @@
 # Copyright (C) 2000-2002 Bruce J. DeGrasse
 # Copyright (C) 2000-2007 Donald N. Allingham
 # Copyright (C) 2007-2012 Brian G. Matherly
-# Copyright (C) 2007      Robert Cawley  <rjc@cawley.id.au>
-# Copyright (C) 2008-2009 James Friedmann <jfriedmannj@gmail.com>
+# Copyright (C) 2008      James Friedmann <jfriedmannj@gmail.com>
 # Copyright (C) 2009      Benny Malengier <benny.malengier@gramps-project.org>
 # Copyright (C) 2010      Jakim Friant
 # Copyright (C) 2010      Vlada Perić <vlada.peric@gmail.com>
-# Copyright (C) 2011      Matt Keenan <matt.keenan@gmail.com>
 # Copyright (C) 2011      Tim G L Lyons
-# Copyright (C) 2012      lcc <lcc@6zap.com>
 # Copyright (C) 2013-2014 Paul Franklin
-# Copyright (C) 2015      Craig J. Anderson
+# Copyright (C) 2014      Gerald Kunzmann <g.kunzmann@arcor.de>
 # Copyright (C) 2017      Robert Carnell <bertcarnell_at_gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -32,8 +29,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-"""Reports/Text Reports/Detailed Descendant Report"""
-
+"""Reports/Text Reports/Detailed Ancestral Report"""
 
 # ------------------------------------------------------------------------
 #
@@ -70,14 +66,7 @@ from gramps.gen.plug.docgen import (
     IndexMark,
     ParagraphStyle,
 )
-from gramps.gen.plug.menu import (
-    BooleanListOption,
-    BooleanOption,
-    EnumeratedListOption,
-    FilterOption,
-    NumberOption,
-    PersonOption,
-)
+from gramps.gen.plug.menu import BooleanOption, FilterOption, NumberOption, PersonOption
 from gramps.gen.plug.report import (
     Bibliography,
     MenuReportOptions,
@@ -88,6 +77,7 @@ from gramps.gen.plug.report import (
 )
 from gramps.gen.proxy import CacheProxyDb
 from gramps.gen.utils.alive import probably_alive
+from gramps.gen.utils.db import get_participant_from_event
 from gramps.gen.utils.file import create_checksum, media_path_full
 from gramps.plugins.docgen.latexdoc import *
 from gramps.plugins.lib.libnarrate import Narrator
@@ -99,23 +89,28 @@ from gramps.plugins.textreport.customnarrator import (
 )
 
 _ = glocale.translation.gettext
+
+# ---------------------------------------------------------------------------------------------------
+
 # ------------------------------------------------------------------------
 #
 # Constants
 #
 # ------------------------------------------------------------------------
 EMPTY_ENTRY = "_____________"
-HENRY = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
-class LatexDownReport(Report):
-    """Detailed Descendant Report"""
-
-    ortsliste = {}
+# ------------------------------------------------------------------------
+#
+# DetAncestorReport
+#
+# ------------------------------------------------------------------------
+class LatexUpReport(Report):
+    """the Detailed Ancestor Report"""
 
     def __init__(self, database, options, user):
         """
-        Create the DetDescendantReport object that produces the report.
+        Create the DetAncestorReport object that produces the report.
 
         The arguments are:
 
@@ -130,38 +125,26 @@ class LatexDownReport(Report):
         inc_id        - Whether to include Gramps IDs
         pagebgg       - Whether to include page breaks between generations.
         pageben       - Whether to include page break before End Notes.
-        fulldates     - Whether to use full dates instead of just year.
-        listc         - Whether to list children.
+        firstName     - Whether to use first names instead of pronouns.
+        fulldate      - Whether to use full dates instead of just year.
+        listchildren  - Whether to list children.
         list_children_spouses - Whether to list the spouses of the children
-        incnotes      - Whether to include notes.
-        usecall       - Whether to use the call name as the first name.
-        repplace      - Whether to replace missing Places with ___________.
-        repdate       - Whether to replace missing Dates with ___________.
-        computeage    - Whether to compute age.
-        verbose       - Whether to use complete sentences.
-        numbering     - The descendancy numbering system to be utilized.
-        desref        - Whether to add descendant references in child list.
-        incphotos     - Whether to include images.
-        incnames      - Whether to include other names.
-        incevents     - Whether to include events.
-        incaddresses  - Whether to include addresses.
-        incsrcnotes   - Whether to include source notes in the Endnotes
-                            section. Only works if Include sources is selected.
-        incmates      - Whether to include information about spouses
+        includenotes  - Whether to include notes.
         incattrs      - Whether to include attributes
-        incpaths      - Whether to include the path of descendancy
-                            from the start-person to each descendant.
-        incssign      - Whether to include a sign ('+') before the
-                            descendant number in the child-list
-                            to indicate a child has succession.
+        blankplace    - Whether to replace missing Places with ___________.
+        blankDate     - Whether to replace missing Dates with ___________.
+        calcageflag   - Whether to compute age.
+        dupperson     - Whether to omit duplicate ancestors
+                            (e.g. when distant cousins marry).
+        verbose       - Whether to use complete sentences
+        childref      - Whether to add descendant references in child list.
+        addimages     - Whether to include images.
         pid           - The Gramps ID of the center person for the report.
         name_format   - Preferred format to display names
-        incmateref    - Whether to print mate information or reference
+        other_events  - Whether to include other events.
         incl_private  - Whether to include private data
         living_people - How to handle living people
         years_past_death - Consider as living this many years after death
-        structure     - How to structure the report
-        latex_format_output - if the output file should be formatted using latexindent
         """
         Report.__init__(self, database, options, user)
 
@@ -197,12 +180,13 @@ class LatexDownReport(Report):
         self.listchildren = get_value("listc")
         self.list_children_spouses = get_value("listc_spouses")
         self.inc_notes = get_value("incnotes")
+        # TODO: Inc_mates als Option?
+        self.inc_mates = True
         self.calcageflag = get_value("computeage")
+        self.dupperson = get_value("omitda")
         self.verbose = get_value("verbose")
-        self.numbering = get_value("numbering")
         self.childref = get_value("desref")
         self.addimages = get_value("incphotos")
-        self.structure = get_value("structure")
         self.inc_tags = get_value("inc_tags")
         self.inc_tag = {
             key: value
@@ -211,14 +195,12 @@ class LatexDownReport(Report):
         }
         self.inc_names = get_value("incnames")
         self.inc_events = get_value("incevents")
+        self.other_events = get_value("incotherevents")
         self.inc_addr = get_value("incaddresses")
         self.inc_sources = get_value("incsources")
         self.inc_srcnotes = get_value("incsrcnotes")
-        self.inc_mates = get_value("incmates")
         self.inc_attrs = get_value("incattrs")
-        self.inc_paths = get_value("incpaths")
-        self.inc_ssign = get_value("incssign")
-        self.inc_materef = get_value("incmateref")
+        self.initial_sosa = get_value("initial_sosa")
         self.want_ids = get_value("inc_id")
         self.latex_format_output = get_value("latex_format_output")
 
@@ -227,173 +209,90 @@ class LatexDownReport(Report):
         if self.center_person is None:
             raise ReportError(_("Person %s is not in the Database") % pid)
 
-        self.gen_handles = {}
-        self.prev_gen_handles = {}
-        self.gen_keys = []
-        self.dnumber = {}
-        self.dmates = {}
-        self.numbers_printed = list()
-
         filter_option = options.menu.get_option_by_name("filter")
         self.filter = filter_option.get_filter()
 
         stdoptions.run_name_format_option(self, menu)
+        self._nd = self._name_display
 
         self.place_format = menu.get_option_by_name("place_format").get_value()
 
+        self.gen_handles = {}
+        self.prev_gen_handles = {}
+
         self.bibli = Bibliography(Bibliography.MODE_DATE | Bibliography.MODE_PAGE)
 
-    def apply_henry_filter(self, person_handle, index, pid, cur_gen=1):
-        """Filter for Henry numbering"""
-        if (not person_handle) or (cur_gen > self.max_generations):
-            return
-        if person_handle in self.dnumber:
-            if self.dnumber[person_handle] > pid:
-                self.dnumber[person_handle] = pid
-        else:
-            self.dnumber[person_handle] = pid
-        self.map[index] = person_handle
-
-        if len(self.gen_keys) < cur_gen:
-            self.gen_keys.append([index])
-        else:
-            self.gen_keys[cur_gen - 1].append(index)
-
-        person = self._db.get_person_from_handle(person_handle)
-        index = 0
-        for family_handle in person.get_family_handle_list():
-            family = self._db.get_family_from_handle(family_handle)
-            for child_ref in family.get_child_ref_list():
-                _ix = max(self.map)
-                self.apply_henry_filter(
-                    child_ref.ref, _ix + 1, pid + HENRY[index], cur_gen + 1
-                )
-                index += 1
-
-    def apply_mhenry_filter(self, person_handle, index, pid, cur_gen=1):
-        """Filter for Modified Henry numbering"""
-
-        def mhenry():
-            """convenience finction"""
-            return str(index) if index < 10 else "(" + str(index) + ")"
-
-        if (not person_handle) or (cur_gen > self.max_generations):
-            return
-        self.dnumber[person_handle] = pid
-        self.map[index] = person_handle
-
-        if len(self.gen_keys) < cur_gen:
-            self.gen_keys.append([index])
-        else:
-            self.gen_keys[cur_gen - 1].append(index)
-
-        person = self._db.get_person_from_handle(person_handle)
-        index = 1
-        for family_handle in person.get_family_handle_list():
-            family = self._db.get_family_from_handle(family_handle)
-            for child_ref in family.get_child_ref_list():
-                _ix = max(self.map)
-                self.apply_henry_filter(
-                    child_ref.ref, _ix + 1, pid + mhenry(), cur_gen + 1
-                )
-                index += 1
-
-    def apply_daboville_filter(self, person_handle, index, pid, cur_gen=1):
-        """Filter for d'Aboville numbering"""
-        if (not person_handle) or (cur_gen > self.max_generations):
-            return
-        self.dnumber[person_handle] = pid
-        self.map[index] = person_handle
-
-        if len(self.gen_keys) < cur_gen:
-            self.gen_keys.append([index])
-        else:
-            self.gen_keys[cur_gen - 1].append(index)
-
-        person = self._db.get_person_from_handle(person_handle)
-        index = 1
-        for family_handle in person.get_family_handle_list():
-            family = self._db.get_family_from_handle(family_handle)
-            for child_ref in family.get_child_ref_list():
-                _ix = max(self.map)
-                self.apply_daboville_filter(
-                    child_ref.ref, _ix + 1, pid + "." + str(index), cur_gen + 1
-                )
-                index += 1
-
-    def apply_mod_reg_filter_aux(self, person_handle, index, cur_gen=1):
-        """Filter for Record-style (Modified Register) numbering"""
-        if (not person_handle) or (cur_gen > self.max_generations):
+    def apply_filter(self, person_handle, index):
+        """recurse up through the generations"""
+        if (not person_handle) or (index >= 2**self.max_generations):
             return
         self.map[index] = person_handle
 
-        if len(self.gen_keys) < cur_gen:
-            self.gen_keys.append([index])
-        else:
-            self.gen_keys[cur_gen - 1].append(index)
-
         person = self._db.get_person_from_handle(person_handle)
-
-        for family_handle in person.get_family_handle_list():
+        family_handle = person.get_main_parents_family_handle()
+        if family_handle:
             family = self._db.get_family_from_handle(family_handle)
-            for child_ref in family.get_child_ref_list():
-                _ix = max(self.map)
-                self.apply_mod_reg_filter_aux(child_ref.ref, _ix + 1, cur_gen + 1)
-
-    def apply_mod_reg_filter(self, person_handle):
-        """Entry Filter for Record-style (Modified Register) numbering"""
-        self.apply_mod_reg_filter_aux(person_handle, 1, 1)
-        mod_reg_number = 1
-        for keys in self.gen_keys:
-            for key in keys:
-                person_handle = self.map[key]
-                if person_handle not in self.dnumber:
-                    self.dnumber[person_handle] = mod_reg_number
-                    mod_reg_number += 1
+            self.apply_filter(family.get_father_handle(), index * 2)
+            self.apply_filter(family.get_mother_handle(), (index * 2) + 1)
 
     def write_report(self):
-        """
-        This function is called by the report system and writes the report.
-        """
-        # Filter based on seleted Numbering System:
-        if self.numbering == "Henry":
-            self.apply_henry_filter(self.center_person.get_handle(), 1, "1")
-        elif self.numbering == "Modified Henry":
-            self.apply_mhenry_filter(self.center_person.get_handle(), 1, "1")
-        elif self.numbering == "d'Aboville":
-            self.apply_daboville_filter(self.center_person.get_handle(), 1, "1")
-        elif self.numbering == "Record (Modified Register)":
-            self.apply_mod_reg_filter(self.center_person.get_handle())
-        else:
-            raise AttributeError("no such numbering: '%s'" % self.numbering)
+        self.apply_filter(self.center_person.get_handle(), 1)
 
         # Apply additional filter as selected:
         if self.filter:
             self.filtered_subset = self.filter.apply(self._db, user=self._user)
 
-        name = self._name_display.display_name(self.center_person.get_primary_name())
+        name = self._nd.display_name(self.center_person.get_primary_name())
         if not name:
             name = self._("Unknown")
 
-        self.numbers_printed = list()
+        generation = 0
 
-        # Walk through the people:
-        if self.structure == "by generation":
-            for generation, gen_keys in enumerate(self.gen_keys):
+        for key in sorted(self.map):
+            if generation == 0 or key >= 2**generation:
                 text = self._("Generation %d") % (generation + 1)
                 self.latex.append("\\generation{" + text + "}")
+                generation += 1
                 if self.childref:
                     self.prev_gen_handles = self.gen_handles.copy()
                     self.gen_handles.clear()
-                for key in gen_keys:
-                    person_handle = self.map[key]
-                    self.gen_handles[person_handle] = key
-                    self.write_person(key)
-        elif self.structure == "by lineage":
-            for key in sorted(self.map):
-                self.write_person(key)
-        else:
-            raise AttributeError("no such structure: '%s'" % self.structure)
+
+            person_handle = self.map[key]
+            person = self._db.get_person_from_handle(person_handle)
+            self.gen_handles[person_handle] = key
+
+            dupperson = self.write_person(key)
+            if dupperson == 0:  # Is this a duplicate ind record
+                if self.listchildren or self.inc_events:
+                    for family_handle in person.get_family_handle_list():
+                        family = self._db.get_family_from_handle(family_handle)
+                        mother_handle = family.get_mother_handle()
+                        if (
+                            mother_handle is None
+                            or mother_handle not in iter(self.map.values())
+                            or person.get_gender() == Person.FEMALE
+                        ):
+                            # The second test above also covers the 1. person's
+                            # mate, which is not an ancestor and as such is not
+                            # included in the self.map dictionary
+                            if self.listchildren:
+                                self.write_children(family)
+                            if self.inc_events:
+                                self.write_family_events(family)
+
+                # ---------------------------------------------------------------------------------------------------
+
+        if self.inc_sources:
+            if self.pgbrkenotes:
+                self.doc.page_break()
+            # it ignores language set for Note type (use locale)
+            endnotes.write_endnotes(
+                self.bibli,
+                self._db,
+                self.doc,
+                printnotes=self.inc_srcnotes,
+                elocale=self._locale,
+            )
 
         # Determine filename
         if self.doc._backend.filename:
@@ -401,7 +300,7 @@ class LatexDownReport(Report):
         else:
             dir = os.path.dirname(self.doc.filename)  # Report is part of a book
         filename = latex_helper.get_filename(
-            self.center_person, "latex-down", "", "tex", dir, ""
+            self.center_person, "latex-up", "", "tex", dir, ""
         )
         # Write LaTeX Output to file:
         latex_helper.write_output_to_file(filename, self.latex)
@@ -411,45 +310,18 @@ class LatexDownReport(Report):
         if self.latex_format_output:
             latex_helper.format_with_latexindent(filename)
 
-        include_ortsliste = False
-        if include_ortsliste:
-            ...
-            # Write files for map generation
-            # Coordinates with density information --> file.coord
-            # ortsdetails[0] = lat, [1] = long, [2] = density
-            # TODO: normalize densities
-            # with open(
-            #     output_path + "maps\\" + output_file_id + ".coord",
-            #     "w",
-            #     newline="",
-            #     encoding="utf-8",
-            # ) as f:
-            #     writer = csv.writer(f)
-            #     for ort, ortsdetails in self.ortsliste.items():
-            #         writer.writerow(
-            #             [str(ortsdetails[1]), str(ortsdetails[0]), str(ortsdetails[2])]
-            #         )
-            # # Coordinates with name information --> file.label
-            # with open(
-            #     output_path + "maps\\" + output_file_id + ".label",
-            #     "w",
-            #     newline="",
-            #     encoding="utf-8",
-            # ) as f:
-            #     writer = csv.writer(f)
-            #     for ort, ortsdetails in self.ortsliste.items():
-            #         ort_length = ort.find(",")
-            #         if ort_length > 0:
-            #             ort = ort[0:ort_length]
-            #         writer.writerow([str(ortsdetails[1]), str(ortsdetails[0]), ort])
-            # self.ortsliste = {}
-            # TODO: Calculate bounding box
-
     def append_bio_facts(self, person_data):
         biography = latex_helper.get_latex_biography(
-            person_data, "henry", self.want_ids
+            person_data, "kekule", self.want_ids
         )
         self.latex.append(biography)
+
+    def _get_s_s(self, key):
+        """returns Sosa-Stradonitz (a.k.a. Kekule or Ahnentafel) number"""
+        generation = int(math.floor(math.log(key, 2)))  # 0
+        gen_start = pow(2, generation)  # 1
+        new_gen_start = self.initial_sosa * gen_start  # 3
+        return new_gen_start + (key - gen_start)  # 3+0
 
     def write_person(self, key):
         """Output birth, death, parentage, marriage and notes information"""
@@ -458,67 +330,65 @@ class LatexDownReport(Report):
 
         person_handle = self.map[key]
         person = self._db.get_person_from_handle(person_handle)
+        self.__narrator.set_subject(person)
 
-        val = self.dnumber[person_handle]
-
-        if val in self.numbers_printed:
-            return
-        else:
-            self.numbers_printed.append(val)
-
-        person_data["kekule"] = val
+        person_data["kekule"] = str(self._get_s_s(key))
         self.write_person_info(person, person_data)
-        partners = []
 
-        if self.inc_mates:
-            letter = lambda n: chr(ord('a') + n) if 0 <= n <= 25 else ""
-            partner_nr = 0
-            for family_handle in person.get_family_handle_list():
-                family = self._db.get_family_from_handle(family_handle)
-                person_data_mate = latex_helper.get_empty_indiviudal()
-                person_data_mate["kekule"] = (
-                    person_data["kekule"] + letter(partner_nr)
-                )
-                person_data_mate["partner"] = person
-                self.__write_mate(person, family, person_data_mate)
-                partners.append(person_data_mate)
-                partner_nr += 1
+        if self.dupperson:
+            # Check for duplicate record (result of distant cousins marrying)
+            for dkey in sorted(self.map):
+                if dkey >= key:
+                    break
+                if self.map[key] == self.map[dkey]:
+                    indiv = self._db.get_person_from_handle(self.map[key])
+                    name = self._name_display.display(indiv)
+                    if not name:
+                        name = self._("Unknown")
+
+                    indiv_sosa = self._get_s_s(key)
+                    dublette = self._db.get_person_from_handle(self.map[dkey])
+                    dublette_sosa = self._get_s_s(dkey)
+                    text = "\\kekule{" + str(indiv_sosa) + "} =\enskip{}"
+                    text += "\hyperref[" + latex_helper.get_latex_id(dublette) + "]{"
+                    text += "\kekule{" + str(dublette_sosa) + "}" + name
+                    text += (
+                        "}\seitenzahlpunkte{"
+                        + latex_helper.get_latex_id(dublette)
+                        + "}"
+                    )
+                    self.latex.append(text + " " + "\n\n")
+
+                    return 1  # Duplicate person
+
+        if not key % 2 or key == 1:
+            # latex_helper.write_marriage(
+            #    self._db, self.__narrator, self._name_display, person, person_data
+            # )
+            # TODO: Hochzeiten werden bei beiden Partnern ausgegeben, etwas redundant...
+            ...
+
+        partners = []
+        if key == 1:
+            if self.inc_mates:
+                letter = lambda n: chr(ord("a") + n) if 0 <= n <= 25 else ""
+                partner_nr = 0
+                for family_handle in person.get_family_handle_list():
+                    family = self._db.get_family_from_handle(family_handle)
+                    person_data_mate = latex_helper.get_empty_indiviudal()
+                    person_data_mate["kekule"] = person_data["kekule"] + letter(
+                        partner_nr
+                    )
+                    person_data_mate["partner"] = person
+                    self.__write_mate(person, person_data_mate)
+                    partners.append(person_data_mate)
+                    partner_nr += 1
 
         self.append_bio_facts(person_data)
         for partner in partners:
             self.append_bio_facts(partner)
 
-    def __write_mate(self, person, family, person_data):
-        """
-        Write information about the person's spouse/mate.
-        """
-        if person.get_gender() == Person.MALE:
-            mate_handle = family.get_mother_handle()
-        else:
-            mate_handle = family.get_father_handle()
-
-        if mate_handle:
-            mate = self._db.get_person_from_handle(mate_handle)
-
-            name = self._name_display.display(mate)
-            if not name:
-                name = self._("Unknown")
-
-            if not self.inc_materef:
-                # Don't want to just print reference
-                self.write_person_info(mate, person_data)
-            else:
-                # Check to see if we've married a cousin
-                if mate_handle in self.dnumber:
-                    self.doc.start_paragraph("DDR-MoreDetails")
-                    self.doc.write_text_citation(
-                        self._("Ref: %(number)s. %(name)s")
-                        % {"number": self.dnumber[mate_handle], "name": name}
-                    )
-                    self.doc.end_paragraph()
-                else:
-                    self.dmates[mate_handle] = person.get_handle()
-                    self.write_person_info(mate, person_data)
+        return 0  # Not duplicate person
 
     def write_person_info(self, person: Person, person_data):
         """write out all the person's information"""
@@ -743,67 +613,6 @@ class LatexDownReport(Report):
 
         # Ortsliste
         # TODO: Ortsliste not implemented yet.
-        include_ortsliste = False
-        if include_ortsliste:
-            bapt_ref = ""
-            christ_ref = ""
-            buried_ref = ""
-            for event_ref in person.get_event_ref_list():
-                event = self._db.get_event_from_handle(event_ref.ref)
-                if event and event_ref.role.value == EventRoleType.PRIMARY:
-                    if event.type.value == EventType.BAPTISM:
-                        bapt_ref = event_ref
-                    if event.type.value == EventType.CHRISTEN:
-                        christ_ref = event_ref
-                    if event.type.value == EventType.BURIAL:
-                        buried_ref = event_ref
-
-            event_refs = [
-                person.get_birth_ref(),
-                bapt_ref,
-                christ_ref,
-                buried_ref,
-                person.get_death_ref(),
-            ]
-            for event_ref in event_refs:
-                if event_ref and event_ref.ref:
-                    event = self._db.get_event_from_handle(event_ref.ref)
-                    if event:
-                        place_handle = event.get_place_handle()
-                        if place_handle:
-                            place = self._db.get_place_from_handle(place_handle)
-                            place_text = _pd.display_event(
-                                self._db, event, self.place_format
-                            )
-                            lat = (
-                                place.get_latitude()
-                            )  # formatted with leading cardinal direction (WESN)
-                            lon = (
-                                place.get_longitude()
-                            )  # formatted with leading cardinal direction (WESN)
-                            if lat and lon:
-                                if not place_text in self.ortsliste:  # it's a new place
-                                    lat_card_direction = lat[0]
-                                    lon_card_direction = lon[0]
-                                    if lat_card_direction == "N":
-                                        lat = lat[1:]
-                                    elif lat_card_direction == "S":
-                                        lat = "-" + lat[1:]
-                                    if lon_card_direction == "E":
-                                        lon = lon[1:]
-                                    elif lon_card_direction == "W":
-                                        lon = "-" + lon[1:]
-
-                                    self.ortsliste[place_text] = [
-                                        lat,
-                                        lon,
-                                        1,
-                                    ]  # add new place to list
-                                else:
-                                    self.ortsliste[place_text][
-                                        2
-                                    ] += 1  # it's a known place, just increase the counter
-                                break
 
         # born:
         person_data["geboren"] = latex_helper.transform_abbreviations(
@@ -848,8 +657,222 @@ class LatexDownReport(Report):
                 if note_counter < len(notelist):
                     person_data["notitzen"] += "\\\\\r"
 
+    def write_children(self, family):
+        """
+        List children.
+        :param family: Family
+        :return:
+        """
+
+        if not family.get_child_ref_list():
+            return
+
+        mother_handle = family.get_mother_handle()
+        if mother_handle:
+            mother = self._db.get_person_from_handle(mother_handle)
+            mother_name = self._nd.display(mother)
+            if not mother_name:
+                mother_name = self._("Unknown")
+        else:
+            mother_name = self._("Unknown")
+
+        father_handle = family.get_father_handle()
+        if father_handle:
+            father = self._db.get_person_from_handle(father_handle)
+            father_name = self._nd.display(father)
+            if not father_name:
+                father_name = self._("Unknown")
+        else:
+            father_name = self._("Unknown")
+
+        self.doc.start_paragraph("DAR-ChildTitle")
+        self.doc.write_text(
+            self._("Children of %(mother_name)s and %(father_name)s")
+            % {"father_name": father_name, "mother_name": mother_name}
+        )
+        self.doc.end_paragraph()
+
+        cnt = 1
+        for child_ref in family.get_child_ref_list():
+            child_handle = child_ref.ref
+            child = self._db.get_person_from_handle(child_handle)
+            child_name = self._nd.display(child)
+            if not child_name:
+                child_name = self._("Unknown")
+            child_mark = utils.get_person_mark(self._db, child)
+
+            if self.childref and self.prev_gen_handles.get(child_handle):
+                value = int(self.prev_gen_handles.get(child_handle))
+                child_name += " [%d]" % self._get_s_s(value)
+
+            self.doc.start_paragraph("DAR-ChildList", utils.roman(cnt).lower() + ".")
+            cnt += 1
+
+            self.__narrator.set_subject(child)
+            if child_name:
+                self.doc.write_text("%s. " % child_name, child_mark)
+                if self.want_ids:
+                    self.doc.write_text("(%s) " % child.get_gramps_id())
+            self.doc.write_text_citation(
+                self.__narrator.get_born_string()
+                or self.__narrator.get_christened_string()
+                or self.__narrator.get_baptised_string()
+            )
+            # Write Death and/or Burial text only if not probably alive
+            if not probably_alive(child, self.database):
+                self.doc.write_text_citation(
+                    self.__narrator.get_died_string()
+                    or self.__narrator.get_buried_string()
+                )
+            # if the list_children_spouses option is selected:
+            if self.list_children_spouses:
+                # get the family of the child that contains the spouse
+                # of the child.  There may be more than one spouse for each
+                # child
+                family_handle_list = child.get_family_handle_list()
+                # for the first spouse, this is true.
+                # For subsequent spouses, make it false
+                is_first_family = True
+                for family_handle in family_handle_list:
+                    child_family = self.database.get_family_from_handle(family_handle)
+                    self.doc.write_text_citation(
+                        self.__narrator.get_married_string(
+                            child_family, is_first_family, self._name_display
+                        )
+                    )
+                    is_first_family = False
+            self.doc.end_paragraph()
+
+    def write_family_events(self, family):
+        """write the family events"""
+
+        if not family.get_event_ref_list():
+            return
+
+        mother_handle = family.get_mother_handle()
+        if mother_handle:
+            mother = self._db.get_person_from_handle(mother_handle)
+            mother_name = self._nd.display(mother)
+            if not mother_name:
+                mother_name = self._("Unknown")
+        else:
+            mother_name = self._("Unknown")
+
+        father_handle = family.get_father_handle()
+        if father_handle:
+            father = self._db.get_person_from_handle(father_handle)
+            father_name = self._nd.display(father)
+            if not father_name:
+                father_name = self._("Unknown")
+        else:
+            father_name = self._("Unknown")
+
+        first = True
+        for event_ref in family.get_event_ref_list():
+            if first:
+                self.doc.start_paragraph("DAR-MoreHeader")
+                self.doc.write_text(
+                    self._("More about %(mother_name)s and %(father_name)s:")
+                    % {"mother_name": mother_name, "father_name": father_name}
+                )
+                self.doc.end_paragraph()
+                first = False
+            self.write_event(event_ref)
+
+    def __write_mate(self, person, person_data):
+        """Output birth, death, parentage, marriage and notes information"""
+        ind = None
+        has_info = False
+
+        for family_handle in person.get_family_handle_list():
+            family = self._db.get_family_from_handle(family_handle)
+            ind_handle = None
+            if person.get_gender() == Person.MALE:
+                ind_handle = family.get_mother_handle()
+            else:
+                ind_handle = family.get_father_handle()
+            if ind_handle:
+                ind = self._db.get_person_from_handle(ind_handle)
+
+                for event_ref in ind.get_primary_event_ref_list():
+                    event = self._db.get_event_from_handle(event_ref.ref)
+                    if event:
+                        etype = event.get_type()
+                        if (
+                            etype == EventType.BAPTISM
+                            or etype == EventType.BURIAL
+                            or etype == EventType.BIRTH
+                            or etype == EventType.DEATH
+                        ):
+                            has_info = True
+                            break
+                if not has_info:
+                    family_handle = ind.get_main_parents_family_handle()
+                    if family_handle:
+                        fam = self._db.get_family_from_handle(family_handle)
+                        if fam.get_mother_handle() or fam.get_father_handle():
+                            has_info = True
+                            break
+
+            if has_info:
+                self.write_person_info(ind, person_data)
+
+                # self.doc.start_paragraph("DAR-MoreHeader")
+
+                # plist = ind.get_media_list()
+
+                # if self.addimages and len(plist) > 0:
+                #     photo = plist[0]
+                #     utils.insert_image(self._db, self.doc, photo, self._user)
+
+                # name = self._nd.display(ind)
+                # if not name:
+                #     name = self._("Unknown")
+                # mark = utils.get_person_mark(self._db, ind)
+
+                # if family.get_relationship() == FamilyRelType.MARRIED:
+                #     self.doc.write_text(self._("Spouse: %s") % name, mark)
+                # else:
+                #     self.doc.write_text(self._("Relationship with: %s") % name, mark)
+                # if name[-1:] != ".":
+                #     self.doc.write_text(".")
+                # if self.want_ids:
+                #     self.doc.write_text(" (%s)" % ind.get_gramps_id())
+                # self.doc.write_text_citation(self.endnotes(ind))
+                # self.doc.end_paragraph()
+
+                # self.doc.start_paragraph("DAR-Entry")
+
+                # self.__narrator.set_subject(ind)
+
+                # text = self.__narrator.get_born_string()
+                # if text:
+                #     self.doc.write_text_citation(text)
+
+                # text = self.__narrator.get_baptised_string()
+                # if text:
+                #     self.doc.write_text_citation(text)
+
+                # text = self.__narrator.get_christened_string()
+                # if text:
+                #     self.doc.write_text_citation(text)
+
+                # # Write Death and/or Burial text only if not probably alive
+                # if not probably_alive(ind, self.database):
+                #     text = self.__narrator.get_died_string(self.calcageflag)
+                #     if text:
+                #         self.doc.write_text_citation(text)
+
+                #     text = self.__narrator.get_buried_string()
+                #     if text:
+                #         self.doc.write_text_citation(text)
+
+                # latex_helper.write_parents(self._db, ind, person_data)
+
+                # self.doc.end_paragraph()
+
     def endnotes(self, obj):
-        """write out any endnotes/footnotes"""
+        """cite the endnotes for the object"""
         if not obj or not self.inc_sources:
             return ""
 
@@ -861,11 +884,10 @@ class LatexDownReport(Report):
 
 # ------------------------------------------------------------------------
 #
-# DetDescendantOptions
+# DetAncestorOptions
 #
 # ------------------------------------------------------------------------
-class LatexDownOptions(MenuReportOptions):
-
+class LatexUpOptions(MenuReportOptions):
     """
     Defines options and provides handling interface.
     """
@@ -919,8 +941,9 @@ class LatexDownOptions(MenuReportOptions):
 
     def add_menu_options(self, menu):
         """
-        Add options to the menu for the detailed descendant report.
+        Add Menu Options
         """
+        from functools import partial
 
         # Report Options
         category = _("Report Options")
@@ -936,30 +959,9 @@ class LatexDownOptions(MenuReportOptions):
         add_option("pid", self.__pid)
         self.__pid.connect("value-changed", self.__update_filters)
 
-        numbering = EnumeratedListOption(_("Numbering system"), "Henry")
-        numbering.set_items(
-            [
-                ("Henry", _("Henry numbering")),
-                ("Modified Henry", _("Modified Henry numbering")),
-                ("d'Aboville", _("d'Aboville numbering")),
-                (
-                    "Record (Modified Register)",
-                    _("Record (Modified Register) numbering"),
-                ),
-            ]
-        )
-        numbering.set_help(_("The numbering system to be used"))
-        add_option("numbering", numbering)
-
-        structure = EnumeratedListOption(_("Report structure"), "by generation")
-        structure.set_items(
-            [
-                ("by generation", _("show people by generations")),
-                ("by lineage", _("show people by lineage")),
-            ]
-        )
-        structure.set_help(_("How people are organized in the report"))
-        add_option("structure", structure)
+        start_number = NumberOption(_("Sosa-Stradonitz number"), 1, 1, 16384)
+        start_number.set_help(_("The Sosa-Stradonitz number of the central person."))
+        add_option("initial_sosa", start_number)
 
         gen = NumberOption(_("Generations"), 10, 1, 100)
         gen.set_help(_("The number of generations to include in the report"))
@@ -1017,65 +1019,67 @@ class LatexDownOptions(MenuReportOptions):
 
         # Content
 
-        add_option = partial(menu.add_option, _("Content"))
+        addopt = partial(menu.add_option, _("Content"))
 
         verbose = BooleanOption(_("Use complete sentences"), True)
         verbose.set_help(_("Whether to use complete sentences or succinct language."))
-        add_option("verbose", verbose)
+        addopt("verbose", verbose)
 
         fulldates = BooleanOption(_("Use full dates instead of only the year"), True)
         fulldates.set_help(_("Whether to use full dates instead of just year."))
-        add_option("fulldates", fulldates)
+        addopt("fulldates", fulldates)
 
         computeage = BooleanOption(_("Compute death age"), True)
         computeage.set_help(_("Whether to compute a person's age at death."))
-        add_option("computeage", computeage)
+        addopt("computeage", computeage)
+
+        omitda = BooleanOption(_("Omit duplicate ancestors"), True)
+        omitda.set_help(_("Whether to omit duplicate ancestors."))
+        addopt("omitda", omitda)
 
         usecall = BooleanOption(_("Use callname for common name"), False)
         usecall.set_help(_("Whether to use the call name as the first name."))
-        add_option("usecall", usecall)
+        addopt("usecall", usecall)
 
         # What to include
 
-        add_option = partial(menu.add_option, _("Include"))
+        addopt = partial(menu.add_option, _("Include"))
 
         listc = BooleanOption(_("Include children"), True)
         listc.set_help(_("Whether to list children."))
-        add_option("listc", listc)
+        addopt("listc", listc)
 
         listc_spouses = BooleanOption(_("Include spouses of children"), False)
         listc_spouses.set_help(_("Whether to list the spouses of the children."))
-        add_option("listc_spouses", listc_spouses)
-
-        incmates = BooleanOption(_("Include spouses"), False)
-        incmates.set_help(_("Whether to include detailed spouse information."))
-        add_option("incmates", incmates)
-
-        incmateref = BooleanOption(_("Include spouse reference"), False)
-        incmateref.set_help(_("Whether to include reference to spouse."))
-        add_option("incmateref", incmateref)
+        addopt("listc_spouses", listc_spouses)
 
         incevents = BooleanOption(_("Include events"), False)
         incevents.set_help(_("Whether to include events."))
-        add_option("incevents", incevents)
+        addopt("incevents", incevents)
+
+        incotherevents = BooleanOption(_("Include other events"), False)
+        incotherevents.set_help(
+            _("Whether to include other events " "people participated in.")
+        )
+        addopt("incotherevents", incotherevents)
 
         desref = BooleanOption(_("Include descendant reference in child list"), True)
         desref.set_help(_("Whether to add descendant references in child list."))
-        add_option("desref", desref)
+        addopt("desref", desref)
 
         incphotos = BooleanOption(_("Include Photo/Images from Gallery"), False)
         incphotos.set_help(_("Whether to include images."))
-        add_option("incphotos", incphotos)
+        addopt("incphotos", incphotos)
 
-        add_option = partial(menu.add_option, _("Include (2)"))
+        addopt = partial(menu.add_option, _("Include (2)"))
 
         incnotes = BooleanOption(_("Include notes"), True)
         incnotes.set_help(_("Whether to include notes."))
-        add_option("incnotes", incnotes)
+        addopt("incnotes", incnotes)
 
         incsources = BooleanOption(_("Include sources"), False)
         incsources.set_help(_("Whether to include source references."))
-        add_option("incsources", incsources)
+        addopt("incsources", incsources)
 
         incsrcnotes = BooleanOption(_("Include sources notes"), False)
         incsrcnotes.set_help(
@@ -1084,51 +1088,30 @@ class LatexDownOptions(MenuReportOptions):
                 "Endnotes section. Only works if Include sources is selected."
             )
         )
-        add_option("incsrcnotes", incsrcnotes)
+        addopt("incsrcnotes", incsrcnotes)
 
         incattrs = BooleanOption(_("Include attributes"), False)
         incattrs.set_help(_("Whether to include attributes."))
-        add_option("incattrs", incattrs)
+        addopt("incattrs", incattrs)
 
         incaddresses = BooleanOption(_("Include addresses"), False)
         incaddresses.set_help(_("Whether to include addresses."))
-        add_option("incaddresses", incaddresses)
+        addopt("incaddresses", incaddresses)
 
         incnames = BooleanOption(_("Include alternative names"), False)
         incnames.set_help(_("Whether to include other names."))
-        add_option("incnames", incnames)
-
-        incssign = BooleanOption(
-            _("Include sign of succession ('+') in child-list"), True
-        )
-        incssign.set_help(
-            _(
-                "Whether to include a sign ('+') before the"
-                " descendant number in the child-list to indicate"
-                " a child has succession."
-            )
-        )
-        add_option("incssign", incssign)
-
-        incpaths = BooleanOption(_("Include path to start-person"), False)
-        incpaths.set_help(
-            _(
-                "Whether to include the path of descendancy "
-                "from the start-person to each descendant."
-            )
-        )
-        add_option("incpaths", incpaths)
+        addopt("incnames", incnames)
 
         # How to handle missing information
-        add_option = partial(menu.add_option, _("Missing information"))
+        addopt = partial(menu.add_option, _("Missing information"))
 
         repplace = BooleanOption(_("Replace missing places with ______"), False)
         repplace.set_help(_("Whether to replace missing Places with blanks."))
-        add_option("repplace", repplace)
+        addopt("repplace", repplace)
 
         repdate = BooleanOption(_("Replace missing dates with ______"), False)
         repdate.set_help(_("Whether to replace missing Dates with blanks."))
-        add_option("repdate", repdate)
+        addopt("repdate", repdate)
 
     def make_default_style(self, default_style):
         """Make the default output style for the Detailed Ancestral Report"""
@@ -1141,7 +1124,7 @@ class LatexDownOptions(MenuReportOptions):
         para.set_bottom_margin(0.25)
         para.set_alignment(PARA_ALIGN_CENTER)
         para.set_description(_("The style used for the title."))
-        default_style.add_paragraph_style("DDR-Title", para)
+        default_style.add_paragraph_style("DAR-Title", para)
 
         font = FontStyle()
         font.set(face=FONT_SANS_SERIF, size=14, italic=1)
@@ -1151,70 +1134,70 @@ class LatexDownOptions(MenuReportOptions):
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for the generation header."))
-        default_style.add_paragraph_style("DDR-Generation", para)
+        default_style.add_paragraph_style("DAR-Generation", para)
 
         font = FontStyle()
         font.set(face=FONT_SANS_SERIF, size=10, italic=0, bold=1)
         para = ParagraphStyle()
         para.set_font(font)
-        para.set_left_margin(1.5)  # in centimeters
+        para.set_left_margin(1.0)  # in centimeters
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for the children list title."))
-        default_style.add_paragraph_style("DDR-ChildTitle", para)
+        default_style.add_paragraph_style("DAR-ChildTitle", para)
 
         font = FontStyle()
         font.set(size=10)
         para = ParagraphStyle()
         para.set_font(font)
-        para.set(first_indent=-0.75, lmargin=2.25)
-        para.set_top_margin(0.125)
-        para.set_bottom_margin(0.125)
+        para.set(first_indent=-0.75, lmargin=1.75)
+        para.set_top_margin(0.25)
+        para.set_bottom_margin(0.25)
         para.set_description(_("The style used for the text related to the children."))
-        default_style.add_paragraph_style("DDR-ChildList", para)
+        default_style.add_paragraph_style("DAR-ChildList", para)
 
         font = FontStyle()
         font.set(face=FONT_SANS_SERIF, size=10, italic=0, bold=1)
         para = ParagraphStyle()
         para.set_font(font)
-        para.set(first_indent=0.0, lmargin=1.5)
+        para.set(first_indent=0.0, lmargin=1.0)
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for the note header."))
-        default_style.add_paragraph_style("DDR-NoteHeader", para)
+        default_style.add_paragraph_style("DAR-NoteHeader", para)
 
         para = ParagraphStyle()
-        para.set(lmargin=1.5)
+        para.set(lmargin=1.0)
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The basic style used for the text display."))
-        default_style.add_paragraph_style("DDR-Entry", para)
+        default_style.add_paragraph_style("DAR-Entry", para)
 
         para = ParagraphStyle()
-        para.set(first_indent=-1.5, lmargin=1.5)
+        para.set(first_indent=-1.0, lmargin=1.0)
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for first level headings."))
-        default_style.add_paragraph_style("DDR-First-Entry", para)
+        default_style.add_paragraph_style("DAR-First-Entry", para)
 
         font = FontStyle()
         font.set(size=10, face=FONT_SANS_SERIF, bold=1)
         para = ParagraphStyle()
         para.set_font(font)
-        para.set(first_indent=0.0, lmargin=1.5)
+        para.set(first_indent=0.0, lmargin=1.0)
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for second level headings."))
-        default_style.add_paragraph_style("DDR-MoreHeader", para)
+        default_style.add_paragraph_style("DAR-MoreHeader", para)
 
         font = FontStyle()
         font.set(face=FONT_SERIF, size=10)
         para = ParagraphStyle()
         para.set_font(font)
-        para.set(first_indent=0.0, lmargin=1.5)
+        para.set(first_indent=0.0, lmargin=1.0)
         para.set_top_margin(0.25)
         para.set_bottom_margin(0.25)
         para.set_description(_("The style used for details."))
-        default_style.add_paragraph_style("DDR-MoreDetails", para)
+        default_style.add_paragraph_style("DAR-MoreDetails", para)
 
         endnotes.add_endnote_styles(default_style)

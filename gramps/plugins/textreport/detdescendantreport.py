@@ -399,6 +399,7 @@ class DetDescendantReport(Report):
         
         # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
          #Determine filename	
+         #the user-defined filename can be found here: self.doc._backend.filename
         output_path = "C:\\Users\\andreas.quentin\\OneDrive\\Documents\\Ahnenblatt\\07 LaTeX\\"	
         output_file_id = "latex-desc-" + self.normalize_string(self.center_person.get_nachname() + self.center_person.primary_name.first_name) + "-" + str(self.center_person.get_gramps_id())	
         #Write LaTeX Output	
@@ -671,7 +672,9 @@ class DetDescendantReport(Report):
                     ehepartner.append(individual_aq_mate)	
                     partner_nr += 1
                     #---------------------------------------------------------------------------------------------------
-                    self.__write_mate(person, family)
+                    # DELETED FOR Q-LATEX OUTPUT------------------------------------------------------------------------
+                    #self.__write_mate(person, family)
+                    #---------------------------------------------------------------------------------------------------
                 if self.listchildren:
                     self.__write_children(family)
                 if self.inc_notes:
@@ -847,6 +850,7 @@ class DetDescendantReport(Report):
         for family_handle in person.get_family_handle_list():
             family = self._db.get_family_from_handle(family_handle)
             spouse_handle = utils.find_spouse(person, family)
+            spouse = ""
             if spouse_handle:
                 spouse = self._db.get_person_from_handle(spouse_handle)
                 spouse_mark = utils.get_person_mark(self._db, spouse)
@@ -884,7 +888,9 @@ class DetDescendantReport(Report):
                         if count== len(kinder): kinder_text += ". "	
                         count += 1	
                 if kinder_text: 	
-                    if individual_aq["partner"] != spouse:	
+                    if not spouse:
+                        text += " Kinder: " + kinder_text
+                    elif individual_aq["partner"] != spouse:	
                         text += " Kinder: " + kinder_text	
                     else:	
                         text += " (Kinder:~$\\rightarrow$\\,Partner)"	
@@ -1259,6 +1265,7 @@ class DetDescendantReport(Report):
         if text:
             self.doc.write_text_citation(text)
             # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
+            #todo: prüfen, ob leer, und ansonsten get_christened_string() verwenden!
             individual_aq["getauft"] = LaTeXDoc.transform_abbreviations(text)
             #---------------------------------------------------------------------------------------------------
 

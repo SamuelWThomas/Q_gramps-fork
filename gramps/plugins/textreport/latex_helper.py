@@ -3,7 +3,7 @@ import math
 import os
 import re
 import subprocess  # for Latexindent Formatter
-from typing import List, Dict
+from typing import Dict, List
 
 from gramps.gen.const import HOME_DIR
 from gramps.gen.display.place import displayer as _pd
@@ -224,20 +224,11 @@ def get_latex_biography(person: List[str], order_system: str, gramps_id: bool) -
 
     if person["filtered"]:
         latex_id = person["ID"]
-        hyperlink = f"\\seitenzahl{{{latex_id}}}"
         filter_name = person[
             "filtered"
         ]  # If filter is present, this entry hold the filter name
-        biography += " " + hyperlink
+        biography += f"\\filteredpersonref{{{latex_id}}}{{{filter_name}}}"
         biography += "}"  # This closes the \filteredperson{ tag that the entire entry is wrapped in.
-        biography += (
-            " \\par\\filteredhint{\\filteredhinttext{Gefiltert durch: }"
-            + filter_name
-            + ".}"
-        )
-        biography += (
-            " \\filterchapter{\\nameref{" + person["ID"] + "}}"
-        )  # Named Reference to the Chapter where Person is defined
         biography += " " + "\n\n"
     else:
         biography += ", "
@@ -258,7 +249,8 @@ def get_latex_biography(person: List[str], order_system: str, gramps_id: bool) -
             biography += "\\beruf{" + person["beruf"] + "}, "
         if person["geboren"] != "":
             biography += person["geboren"] + " "
-        biography += person["abstammung"] + ", "
+        if person["abstammung"] != "":
+            biography += person["abstammung"] + ", "
         if person["getauft"] != "":
             biography += person["getauft"] + " "
         if person["gestorben"] != "":
@@ -598,7 +590,7 @@ def tree_create(definition: str, db, person: Person, dir: str) -> str:
                         )
                     else:
                         tree_write_node(db, 1, "c", child, False, tex)
-                tree_write(0, '}\n',tex)
+                tree_write(0, "}\n", tex)
     else:
         return ""  # not a valid definition
     # end tree
@@ -609,7 +601,7 @@ def tree_create(definition: str, db, person: Person, dir: str) -> str:
     filename = get_filename(person, "tree", definition, "graph", dir, "trees")
     directory = os.path.dirname(filename)
     if not os.path.exists(directory):
-        os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
     f = codecs.open(filename, "w+", encoding="utf-8")
     for i in range(len(tex)):
         f.write(tex[i])
@@ -681,10 +673,10 @@ def tree_sand_subgraph_up(
                 max_down,
                 fam_report,
                 siblings,
-                tex
+                tex,
             )
 
-    tree_write(level, '}\n',tex)
+    tree_write(level, "}\n", tex)
 
 
 def tree_sand_subgraph_down(
@@ -701,9 +693,19 @@ def tree_sand_subgraph_down(
     if level >= max_down:
         return
     family = db.get_family_from_handle(family_handles[0])
-    tree_start_subgraph(level, subgraph_type, family,tex)
+    tree_start_subgraph(level, subgraph_type, family, tex)
     for handle in family_handles[1:]:
-        tree_sand_subgraph_down(db,level + 1, "union", [handle], ghandle,max_down,fam_report,siblings,tex)
+        tree_sand_subgraph_down(
+            db,
+            level + 1,
+            "union",
+            [handle],
+            ghandle,
+            max_down,
+            fam_report,
+            siblings,
+            tex,
+        )
     for handle in (family.get_father_handle(), family.get_mother_handle()):
         if handle:
             parent = db.get_person_from_handle(handle)
@@ -719,12 +721,20 @@ def tree_sand_subgraph_down(
             if level + 1 >= max_down:
                 tree_write_node(db, level + 1, "c", child, True, tex)
             else:
-                tree_sand_subgraph_down(db,
-                    level + 1, "child", family_handles, childref.ref,max_down,fam_report,siblings,tex
+                tree_sand_subgraph_down(
+                    db,
+                    level + 1,
+                    "child",
+                    family_handles,
+                    childref.ref,
+                    max_down,
+                    fam_report,
+                    siblings,
+                    tex,
                 )
         else:
             tree_write_node(db, level + 1, "c", child, True, tex)
-    tree_write(level, '}\n',tex)
+    tree_write(level, "}\n", tex)
 
 
 def tree_write_subgraph_desc(
@@ -1035,17 +1045,19 @@ def format_iso(date_tuple, calendar):
 def get_filename(
     person: Person, prefix: str, suffix: str, extension: str, dir: str, subfolder: str
 ) -> str:
-    filename = (
-        normalize_string(prefix)
-        + "-"
-        + normalize_string(get_nachname(person) + person.primary_name.first_name)
+    filename = ""
+    if prefix:
+        filename += normalize_string(prefix) + "-"
+    filename += (
+        normalize_string(get_nachname(person) + "-" + person.primary_name.first_name)
         + "-"
         + str(person.get_gramps_id())
     )
     if suffix:
         filename += "-" + normalize_string(suffix)
-    filename += "." + extension
-    if not dir or not os.path.exists(dir):
+    if extension:
+        filename += "." + extension
+    if not dir:
         dir = HOME_DIR
     filename_abs = os.path.normpath(
         os.path.normcase(os.path.join(dir, subfolder, filename))
@@ -1056,3 +1068,154 @@ def get_filename(
 def normalize_string(text):
     output = re.sub(r"[\\/: \_!\?.%öäüÄÖÜß#,\(\)|]*", r"", text)
     return output
+
+
+def write_output_to_file(filename, output):
+    f = codecs.open(filename, "w+", encoding="utf-8")
+    # write intro for using this file as a subfile in latex
+    f.write(
+        """\\documentclass[00-Maindoc]{subfiles}\n	
+        \\begin{document}\n\n	
+        """
+    )
+    for i in range(len(output) - 1):
+        i = i + 1
+        f.write(output[i])
+    # write outro
+    f.write("\n\\end{document}")
+    f.close()
+
+
+def write_parents(db, person, person_data):
+    """write out the main parents of a person"""
+    geschlecht = person.get_gender()  # Person.MALE / Person.FEMALE / Person.UNKNOWN
+    if geschlecht == Person.MALE:
+        geschlecht_text = "Sohn"
+    elif geschlecht == Person.FEMALE:
+        geschlecht_text = "Tochter"
+    else:
+        geschlecht_text = "Kind"
+    family_handle = person.get_main_parents_family_handle()
+    if family_handle:
+        family = db.get_family_from_handle(family_handle)
+        mother_handle = family.get_mother_handle()
+        father_handle = family.get_father_handle()
+        if mother_handle:
+            mother = db.get_person_from_handle(mother_handle)
+            mother_name = mother.primary_name.first_name + " "
+            mother_spitzname = mother.primary_name.nick
+            if mother_spitzname:
+                mother_name += "\\spitzname{" + mother_spitzname + "} "
+            mother_name += get_nachname(mother)
+            mother_name = mother_name.strip()
+            mother_id = get_latex_id(mother)
+        else:
+            mother_name = ""
+            mother_id = ""
+
+        if father_handle:
+            father = db.get_person_from_handle(father_handle)
+            father_name = father.primary_name.first_name + " "
+            father_spitzname = father.primary_name.nick
+            if father_spitzname:
+                father_name += "\\spitzname{" + father_spitzname + "} "
+            father_name += get_nachname(father)
+            father_name = father_name.strip()
+            father_id = get_latex_id(father)
+        else:
+            father_name = ""
+            father_id = ""
+
+        eltern_text = ""
+        if mother_name or father_name:
+            eltern_text = geschlecht_text + " "
+            if mother_name:
+                eltern_text += (
+                    "der \\hyperref["
+                    + mother_id
+                    + "]{"
+                    + mother_name
+                    + "}\seitenzahl{"
+                    + mother_id
+                    + "} "
+                )
+            if mother_name and father_name:
+                eltern_text += "und "
+            if father_name:
+                eltern_text += (
+                    "des \\hyperref["
+                    + father_id
+                    + "]{"
+                    + father_name
+                    + "}\seitenzahl{"
+                    + father_id
+                    + "} "
+                )
+            eltern_text = eltern_text.strip()
+            eltern_text += ""
+        person_data["abstammung"] = eltern_text
+
+
+def write_marriage(db, narrator, name_display, person, person_data):
+    """
+    Output marriage sentence.
+    """
+    is_first = True
+    hochzeit_nr = 0
+    anzahl_hochzeiten = len(person.get_family_handle_list())
+    for family_handle in person.get_family_handle_list():
+        family = db.get_family_from_handle(family_handle)
+        
+        spouse_handle = None
+        if family:
+            if person.get_handle() == family.get_father_handle():
+                spouse_handle = family.get_mother_handle()
+            else:
+                spouse_handle = family.get_father_handle()
+        
+        spouse = ""
+        if spouse_handle:
+            spouse = db.get_person_from_handle(spouse_handle)
+
+        text = narrator.get_married_string(family, is_first, name_display)
+        if text:
+            text = transform_abbreviations(text)
+            hochzeit_nr += 1
+            if anzahl_hochzeiten > 1:
+                text = "\\circled{" + str(hochzeit_nr) + "}\\," + text
+
+            kinder_text = ""
+            kinder = family.get_child_ref_list()
+            if len(kinder) > 0:
+                count = 1
+                for kind_ref in kinder:
+                    child_handle = kind_ref.ref
+                    kind = db.get_person_from_handle(child_handle)
+                    kind_vorname = kind.primary_name.first_name
+                    kind_spitzname = kind.primary_name.nick
+                    kinder_text += "\\hyperref[" + get_latex_id(kind) + "]{"
+                    if len(kinder) > 1:
+                        kinder_text += "(" + str(count) + ")~"
+                    kinder_text += kind_vorname
+                    if kind_spitzname:
+                        kinder_text += " \\spitzname{" + kind_spitzname + "}"
+                    kinder_text += "}\seitenzahl{" + get_latex_id(kind) + "}"
+                    if count < len(kinder):
+                        kinder_text += ", "
+                    if count == len(kinder):
+                        kinder_text += ". "
+                    count += 1
+            if kinder_text:
+                if not spouse:
+                    text += " Kinder: " + kinder_text
+                elif person_data["partner"] != spouse:
+                    text += " Kinder: " + kinder_text
+                else:
+                    text += " (Kinder:~$\\rightarrow$\\,Partner)"
+
+            if hochzeit_nr < anzahl_hochzeiten:
+                text += "" + "\n\n"
+            person_data["hochzeiten"] += text
+
+            is_first = False
+

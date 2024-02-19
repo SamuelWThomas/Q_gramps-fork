@@ -32,7 +32,8 @@ from io import StringIO
 import tempfile
 import logging
 # ADDED FOR Q-LATEX OUTPUT--------------------------------------------------------------------------
-import math            
+import math     
+from gramps.plugins.textreport.latex_helper import get_latex_id       
 #---------------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------
@@ -469,7 +470,7 @@ class TreeDocBase(BaseDoc, TreeDoc):
                       '\\surn{{{}}}'.format(escape(surn)) if surn else '']
         name_komplett = '{{{}}}'.format(
             ' '.join([e for e in name_parts if e]))
-        hyperref = person.get_latex_id()
+        hyperref = get_latex_id(person)
         hyperref = "{\\hyperref[%s]{%s}},\n" % (hyperref, name_komplett)
         self.write(level+1, 'name = %s' %hyperref)
         #---------------------------------------------------------------------------------------------------

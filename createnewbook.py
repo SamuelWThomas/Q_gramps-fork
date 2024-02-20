@@ -369,7 +369,7 @@ if name:
             new_opt_dict["numbering"] = "Henry"
             new_opt_dict["structure"] = "by generation"
             new_opt_dict["gen"] = generations
-            new_opt_dict["inc_id"] = person_options.get("IDs", False)
+            new_opt_dict["inc_id"] = int(person_options.get("ids", False))
             new_opt_dict["latex_format_output"] = person_options.get("format_output", False)
             new_opt_dict["create_trees"] = person_options.get("trees", False)
             new_opt_dict["name_format"] = 1
